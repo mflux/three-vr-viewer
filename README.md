@@ -53,6 +53,15 @@ You're also given the VR controllers, if present, as an array of controllers[]. 
 - **controllerTextureMap:** (default 'onepointfive_texture.png'). Filename of the Vive controller texture map.
 - **controllerSpecMap:** (default 'onepointfive_spec.png'). Filename of the Vive controller specular map.
 
+For example:
+
+    VRViewer({
+      autoEnter: true,
+      emptyRoom: true
+    });
+
+This automatically enters VR and enables the empty room.
+
 ## Installing from NPM
 
     npm install
