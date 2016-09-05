@@ -1,4 +1,4 @@
-## DAT.GUI for WebVR
+## THREE.js VR Viewer
 
 ![Preview Image](http://i.imgur.com/OGgcuQU.png)
 
