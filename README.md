@@ -33,7 +33,7 @@ The Events object can run callbacks, for example, if you want something to chang
       box.rotation.x += 0.4 * dt;
     });
 
-You're also given the VR controllers, if present, as an array of controllers[]. They are, for the time being, [THREE.ViveController](https://github.com/mrdoob/three.js/blob/dev/examples/js/ViveController.js) objects so you can bind events to them like:
+You're also given the VR controllers, if present, as an array of **controllers[]**. They are, for the time being, [THREE.ViveController](https://github.com/mrdoob/three.js/blob/dev/examples/js/ViveController.js) objects so you can bind events to them like:
 
       controllers[0].addEventListener('triggerdown', function(){
         console.log('controller trigger pressed!');
