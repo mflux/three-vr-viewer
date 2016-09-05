@@ -8,8 +8,9 @@ For now this only works in the [WebVR enabled Chromium build](https://webvr.info
 
 ## Setup ##
 
-Include the script from build/three-vr-viewer.js in your project like
+Include the script from build/three-vr-viewer.js in your project, after THREE.js
 
+    <script type="text/javascript" src="js/three.min.js"></script>
     <script type="text/javascript" src="js/three-vr-viewer.js"></script>
 
 In your own project:
