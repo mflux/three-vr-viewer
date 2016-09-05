@@ -1,0 +1,9 @@
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# NPM
+node_modules
+
+# Builds
+public/dist/*
