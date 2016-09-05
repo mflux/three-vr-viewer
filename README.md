@@ -1,6 +1,6 @@
 ## DAT.GUI for WebVR
 
-![Preview Image](http://i.imgur.com/SGz3gxU.png)
+![Preview Image](http://i.imgur.com/OGgcuQU.png)
 
 One-liner to start THREE.js WebVR projects. This project serves as a super beginner friendly way to build WebVR experiments.
 
@@ -20,9 +20,9 @@ That's literally it.
 
 ## Exposing THREE.js objects ##
 
-VRViewer() returns several objects. You can destructure this object like so:
+**VRViewer()** returns several objects. You can destructure this object like so:
 
-    const { scene, camera, renderer, events, toggleVR, controllers  } = VRViewer();
+    const { scene, camera, renderer, events, toggleVR, controllers } = VRViewer();
 
 Now you have access to the scene, camera, etc.
 
@@ -39,21 +39,21 @@ You're also given the VR controllers, if present, as an array of controllers[]. 
       });
 
 ## Options ##
-VRViewer() can take several options:
+**VRViewer()** can take several options:
 
-- autoEnter: (default false). Automatically enter VR without having to push the button, after 1 second. Extremely useful for VR development.
-- antiAlias: (default true). Anti-aliasing. This reduces performance if on.
-- clearColor: (default 0x505050). Hexadecimal for background color.
-- emptyRoom: (default true). Creates an empty room so you're not floating in space.
-- standing: (default true). Whether or not VRControls is a standing experience.
-- loadControllers: (default true). Attempts to load controller models.
-- vrButton: (default true). Whether or not to show the "Enter VR" button.
-- pathToControllers: (default 'models/obj/vive-controller/'). Path where the Vive controller model is located. In case you need to override it.
-- controllerModelName: (default 'vr_controller_vive_1_5.obj'). Filename of the Vive controller model. In case you need to override it.
-- controllerTextureMap: (default 'onepointfive_texture.png'). Filename of the Vive controller texture map.
-- controllerSpecMap: (default 'onepointfive_spec.png'). Filename of the Vive controller specular map.
+- **autoEnter:** (default false). Automatically enter VR without having to push the button, after 1 second. Extremely useful for VR development.
+- **antiAlias:** (default true). Anti-aliasing. This reduces performance if on.
+- **clearColor:** (default 0x505050). Hexadecimal for background color.
+- **emptyRoom:** (default true). Creates an empty room so you're not floating in space.
+- **standing:** (default true). Whether or not VRControls is a standing experience.
+- **loadControllers:** (default true). Attempts to load controller models.
+- **vrButton:** (default true). Whether or not to show the "Enter VR" button.
+- **pathToControllers:** (default 'models/obj/vive-controller/'). Path where the Vive controller model is located. In case you need to override it.
+- **controllerModelName:** (default 'vr_controller_vive_1_5.obj'). Filename of the Vive controller model. In case you need to override it.
+- **controllerTextureMap:** (default 'onepointfive_texture.png'). Filename of the Vive controller texture map.
+- **controllerSpecMap:** (default 'onepointfive_spec.png'). Filename of the Vive controller specular map.
 
-## Build and Run
+## Installing from NPM
 
     npm install
     npm run dev
