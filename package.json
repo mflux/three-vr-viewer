@@ -2,9 +2,9 @@
   "name": "three-vr-viewer",
   "author": "mflux",
   "license": "MIT",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "One-liner to start THREE.js WebVR projects.",
-  "main": "index.js",
+  "main": "three-vr-viewer.js",
   "scripts": {
     "publish": "npm run build-js-publish && npm run build-copy",
     "dev": "npm run build-js-dev && npm run build-copy",
