@@ -1,163 +1,171 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.VRViewer = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+'use strict';
+
 /**
  * @author mflux / http://minmax.design
  * Based on @mattdesl three-orbit-viewer
  */
 
-const Emitter = require( 'events' );
-const WEBVR = require( './thirdparty/webvr' );
+var Emitter = require('events');
+var WEBVR = require('./thirdparty/webvr');
 
-module.exports = function create( {
+module.exports = function create() {
+  var _ref = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
-  emptyRoom               = true,
-  standing                = true,
-  loadControllers         = true,
-  vrButton                = true,
-  autoEnter               = false,
-  antiAlias               = true,
-  clearColor              = 0x505050,
-  pathToControllers       = 'models/obj/vive-controller/',
-  controllerModelName     = 'vr_controller_vive_1_5.obj',
-  controllerTextureMap    = 'onepointfive_texture.png',
-  controllerSpecMap       = 'onepointfive_spec.png',
-  THREE
-} = {} ){
+  var _ref$emptyRoom = _ref.emptyRoom;
+  var emptyRoom = _ref$emptyRoom === undefined ? true : _ref$emptyRoom;
+  var _ref$standing = _ref.standing;
+  var standing = _ref$standing === undefined ? true : _ref$standing;
+  var _ref$loadControllers = _ref.loadControllers;
+  var loadControllers = _ref$loadControllers === undefined ? true : _ref$loadControllers;
+  var _ref$vrButton = _ref.vrButton;
+  var vrButton = _ref$vrButton === undefined ? true : _ref$vrButton;
+  var _ref$autoEnter = _ref.autoEnter;
+  var autoEnter = _ref$autoEnter === undefined ? false : _ref$autoEnter;
+  var _ref$antiAlias = _ref.antiAlias;
+  var antiAlias = _ref$antiAlias === undefined ? true : _ref$antiAlias;
+  var _ref$clearColor = _ref.clearColor;
+  var clearColor = _ref$clearColor === undefined ? 0x505050 : _ref$clearColor;
+  var _ref$pathToController = _ref.pathToControllers;
+  var pathToControllers = _ref$pathToController === undefined ? 'models/obj/vive-controller/' : _ref$pathToController;
+  var _ref$controllerModelN = _ref.controllerModelName;
+  var controllerModelName = _ref$controllerModelN === undefined ? 'vr_controller_vive_1_5.obj' : _ref$controllerModelN;
+  var _ref$controllerTextur = _ref.controllerTextureMap;
+  var controllerTextureMap = _ref$controllerTextur === undefined ? 'onepointfive_texture.png' : _ref$controllerTextur;
+  var _ref$controllerSpecMa = _ref.controllerSpecMap;
+  var controllerSpecMap = _ref$controllerSpecMa === undefined ? 'onepointfive_spec.png' : _ref$controllerSpecMa;
+  var THREE = _ref.THREE;
 
-const VREffect = require( './thirdparty/vreffect' )( THREE );
-const VRControls = require( './thirdparty/vrcontrols' )( THREE );
-const ViveController = require( './thirdparty/vivecontroller' )( THREE );
-const OBJLoader = require( './thirdparty/objloader' )( THREE );
 
-  if ( WEBVR.isLatestAvailable() === false ) {
-    document.body.appendChild( WEBVR.getMessage() );
+  var VREffect = require('./thirdparty/vreffect')(THREE);
+  var VRControls = require('./thirdparty/vrcontrols')(THREE);
+  var ViveController = require('./thirdparty/vivecontroller')(THREE);
+  var OBJLoader = require('./thirdparty/objloader')(THREE);
+
+  if (WEBVR.isLatestAvailable() === false) {
+    document.body.appendChild(WEBVR.getMessage());
   }
 
-  const events = new Emitter();
+  var events = new Emitter();
 
-  const container = document.createElement( 'div' );
-  document.body.appendChild( container );
+  var container = document.createElement('div');
+  document.body.appendChild(container);
 
+  var scene = new THREE.Scene();
 
-  const scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 10);
+  scene.add(camera);
 
-  const camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.1, 10 );
-  scene.add( camera );
-
-  if( emptyRoom ){
-    const room = new THREE.Mesh(
-      new THREE.BoxGeometry( 6, 6, 6, 8, 8, 8 ),
-      new THREE.MeshBasicMaterial( { color: 0x404040, wireframe: true } )
-    );
+  if (emptyRoom) {
+    var room = new THREE.Mesh(new THREE.BoxGeometry(6, 6, 6, 8, 8, 8), new THREE.MeshBasicMaterial({ color: 0x404040, wireframe: true }));
     room.position.y = 3;
-    scene.add( room );
+    scene.add(room);
 
-    scene.add( new THREE.HemisphereLight( 0x606060, 0x404040 ) );
+    scene.add(new THREE.HemisphereLight(0x606060, 0x404040));
 
-    let light = new THREE.DirectionalLight( 0xffffff );
-    light.position.set( 1, 1, 1 ).normalize();
-    scene.add( light );
+    var light = new THREE.DirectionalLight(0xffffff);
+    light.position.set(1, 1, 1).normalize();
+    scene.add(light);
   }
 
-  const renderer = new THREE.WebGLRenderer( { antialias: antiAlias } );
-  renderer.setClearColor( clearColor );
-  renderer.setPixelRatio( window.devicePixelRatio );
-  renderer.setSize( window.innerWidth, window.innerHeight );
+  var renderer = new THREE.WebGLRenderer({ antialias: antiAlias });
+  renderer.setClearColor(clearColor);
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.sortObjects = false;
-  container.appendChild( renderer.domElement );
+  container.appendChild(renderer.domElement);
 
-  const controls = new THREE.VRControls( camera );
+  var controls = new THREE.VRControls(camera);
   controls.standing = standing;
 
+  var controller1 = new THREE.ViveController(0);
+  var controller2 = new THREE.ViveController(1);
+  scene.add(controller1, controller2);
 
-  const controller1 = new THREE.ViveController( 0 );
-  const controller2 = new THREE.ViveController( 1 );
-  scene.add( controller1, controller2 );
-
-  if( loadControllers ){
+  if (loadControllers) {
     controller1.standingMatrix = controls.getStandingMatrix();
     controller2.standingMatrix = controls.getStandingMatrix();
 
-    const loader = new THREE.OBJLoader();
-    loader.setPath( pathToControllers );
-    loader.load( controllerModelName, function ( object ) {
+    var loader = new THREE.OBJLoader();
+    loader.setPath(pathToControllers);
+    loader.load(controllerModelName, function (object) {
 
-      const textureLoader = new THREE.TextureLoader();
-      textureLoader.setPath( pathToControllers );
+      var textureLoader = new THREE.TextureLoader();
+      textureLoader.setPath(pathToControllers);
 
-      const controller = object.children[ 0 ];
-      controller.material.map = textureLoader.load( controllerTextureMap );
-      controller.material.specularMap = textureLoader.load( controllerSpecMap );
+      var controller = object.children[0];
+      controller.material.map = textureLoader.load(controllerTextureMap);
+      controller.material.specularMap = textureLoader.load(controllerSpecMap);
 
-      controller1.add( object.clone() );
-      controller2.add( object.clone() );
-
-    } );
+      controller1.add(object.clone());
+      controller2.add(object.clone());
+    });
   }
 
-  const effect = new THREE.VREffect( renderer );
+  var effect = new THREE.VREffect(renderer);
 
-  if ( WEBVR.isAvailable() === true ) {
-    if( vrButton ){
-      document.body.appendChild( WEBVR.getButton( effect ) );
+  if (WEBVR.isAvailable() === true) {
+    if (vrButton) {
+      document.body.appendChild(WEBVR.getButton(effect));
     }
 
-    if( autoEnter ){
-      setTimeout( ()=>effect.requestPresent(), 1000 );
+    if (autoEnter) {
+      setTimeout(function () {
+        return effect.requestPresent();
+      }, 1000);
     }
   }
 
-  window.addEventListener( 'resize', function(){
+  window.addEventListener('resize', function () {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
-    effect.setSize( window.innerWidth, window.innerHeight );
+    effect.setSize(window.innerWidth, window.innerHeight);
 
-    events.emit( 'resize', window.innerWidth, window.innerHeight );
-  }, false );
+    events.emit('resize', window.innerWidth, window.innerHeight);
+  }, false);
 
-
-  const clock = new THREE.Clock();
+  var clock = new THREE.Clock();
   clock.start();
 
   function animate() {
-    const dt = clock.getDelta();
+    var dt = clock.getDelta();
 
-    effect.requestAnimationFrame( animate );
+    effect.requestAnimationFrame(animate);
 
     controller1.update();
     controller2.update();
 
     controls.update();
 
-    events.emit( 'tick',  dt );
+    events.emit('tick', dt);
 
     render();
 
-    events.emit( 'render', dt )
+    events.emit('render', dt);
   }
 
   function render() {
-    effect.render( scene, camera );
+    effect.render(scene, camera);
   }
 
-  function toggleVR(){
+  function toggleVR() {
     effect.isPresenting ? effect.exitPresent() : effect.requestPresent();
   }
-
 
   animate();
 
   return {
-    scene, camera, controls, renderer,
-    controllers: [ controller1, controller2 ],
-    events,
-    toggleVR
+    scene: scene, camera: camera, controls: controls, renderer: renderer,
+    controllers: [controller1, controller2],
+    events: events,
+    toggleVR: toggleVR
   };
-}
+};
 
-
-if( window ){
+if (window) {
   window.VRViewer = module.exports;
 }
+
 },{"./thirdparty/objloader":3,"./thirdparty/vivecontroller":4,"./thirdparty/vrcontrols":5,"./thirdparty/vreffect":6,"./thirdparty/webvr":7,"events":2}],2:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -463,191 +471,181 @@ function isUndefined(arg) {
 }
 
 },{}],3:[function(require,module,exports){
+'use strict';
+
 /**
  * @author mrdoob / http://mrdoob.com/
  */
 
-module.exports = function( THREE ){
-	THREE.OBJLoader = function ( manager ) {
+module.exports = function (THREE) {
+	THREE.OBJLoader = function (manager) {
 
-		this.manager = ( manager !== undefined ) ? manager : THREE.DefaultLoadingManager;
+		this.manager = manager !== undefined ? manager : THREE.DefaultLoadingManager;
 
 		this.materials = null;
 
 		this.regexp = {
 			// v float float float
-			vertex_pattern           : /^v\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)/,
+			vertex_pattern: /^v\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)/,
 			// vn float float float
-			normal_pattern           : /^vn\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)/,
+			normal_pattern: /^vn\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)/,
 			// vt float float
-			uv_pattern               : /^vt\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)/,
+			uv_pattern: /^vt\s+([\d|\.|\+|\-|e|E]+)\s+([\d|\.|\+|\-|e|E]+)/,
 			// f vertex vertex vertex
-			face_vertex              : /^f\s+(-?\d+)\s+(-?\d+)\s+(-?\d+)(?:\s+(-?\d+))?/,
+			face_vertex: /^f\s+(-?\d+)\s+(-?\d+)\s+(-?\d+)(?:\s+(-?\d+))?/,
 			// f vertex/uv vertex/uv vertex/uv
-			face_vertex_uv           : /^f\s+(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)(?:\s+(-?\d+)\/(-?\d+))?/,
+			face_vertex_uv: /^f\s+(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)(?:\s+(-?\d+)\/(-?\d+))?/,
 			// f vertex/uv/normal vertex/uv/normal vertex/uv/normal
-			face_vertex_uv_normal    : /^f\s+(-?\d+)\/(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\/(-?\d+)(?:\s+(-?\d+)\/(-?\d+)\/(-?\d+))?/,
+			face_vertex_uv_normal: /^f\s+(-?\d+)\/(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\/(-?\d+)\s+(-?\d+)\/(-?\d+)\/(-?\d+)(?:\s+(-?\d+)\/(-?\d+)\/(-?\d+))?/,
 			// f vertex//normal vertex//normal vertex//normal
-			face_vertex_normal       : /^f\s+(-?\d+)\/\/(-?\d+)\s+(-?\d+)\/\/(-?\d+)\s+(-?\d+)\/\/(-?\d+)(?:\s+(-?\d+)\/\/(-?\d+))?/,
+			face_vertex_normal: /^f\s+(-?\d+)\/\/(-?\d+)\s+(-?\d+)\/\/(-?\d+)\s+(-?\d+)\/\/(-?\d+)(?:\s+(-?\d+)\/\/(-?\d+))?/,
 			// o object_name | g group_name
-			object_pattern           : /^[og]\s*(.+)?/,
+			object_pattern: /^[og]\s*(.+)?/,
 			// s boolean
-			smoothing_pattern        : /^s\s+(\d+|on|off)/,
+			smoothing_pattern: /^s\s+(\d+|on|off)/,
 			// mtllib file_reference
-			material_library_pattern : /^mtllib /,
+			material_library_pattern: /^mtllib /,
 			// usemtl material_name
-			material_use_pattern     : /^usemtl /
+			material_use_pattern: /^usemtl /
 		};
-
 	};
 
 	THREE.OBJLoader.prototype = {
 
 		constructor: THREE.OBJLoader,
 
-		load: function ( url, onLoad, onProgress, onError ) {
+		load: function load(url, onLoad, onProgress, onError) {
 
 			var scope = this;
 
-			var loader = new THREE.XHRLoader( scope.manager );
-			loader.setPath( this.path );
-			loader.load( url, function ( text ) {
+			var loader = new THREE.XHRLoader(scope.manager);
+			loader.setPath(this.path);
+			loader.load(url, function (text) {
 
-				onLoad( scope.parse( text ) );
-
-			}, onProgress, onError );
-
+				onLoad(scope.parse(text));
+			}, onProgress, onError);
 		},
 
-		setPath: function ( value ) {
+		setPath: function setPath(value) {
 
 			this.path = value;
-
 		},
 
-		setMaterials: function ( materials ) {
+		setMaterials: function setMaterials(materials) {
 
 			this.materials = materials;
-
 		},
 
-		_createParserState : function () {
+		_createParserState: function _createParserState() {
 
 			var state = {
-				objects  : [],
-				object   : {},
+				objects: [],
+				object: {},
 
-				vertices : [],
-				normals  : [],
-				uvs      : [],
+				vertices: [],
+				normals: [],
+				uvs: [],
 
-				materialLibraries : [],
+				materialLibraries: [],
 
-				startObject: function ( name, fromDeclaration ) {
+				startObject: function startObject(name, fromDeclaration) {
 
 					// If the current object (initial from reset) is not from a g/o declaration in the parsed
 					// file. We need to use it for the first parsed g/o to keep things in sync.
-					if ( this.object && this.object.fromDeclaration === false ) {
+					if (this.object && this.object.fromDeclaration === false) {
 
 						this.object.name = name;
-						this.object.fromDeclaration = ( fromDeclaration !== false );
+						this.object.fromDeclaration = fromDeclaration !== false;
 						return;
-
 					}
 
-					if ( this.object && typeof this.object._finalize === 'function' ) {
+					if (this.object && typeof this.object._finalize === 'function') {
 
 						this.object._finalize();
-
 					}
 
-					var previousMaterial = ( this.object && typeof this.object.currentMaterial === 'function' ? this.object.currentMaterial() : undefined );
+					var previousMaterial = this.object && typeof this.object.currentMaterial === 'function' ? this.object.currentMaterial() : undefined;
 
 					this.object = {
-						name : name || '',
-						fromDeclaration : ( fromDeclaration !== false ),
+						name: name || '',
+						fromDeclaration: fromDeclaration !== false,
 
-						geometry : {
-							vertices : [],
-							normals  : [],
-							uvs      : []
+						geometry: {
+							vertices: [],
+							normals: [],
+							uvs: []
 						},
-						materials : [],
-						smooth : true,
+						materials: [],
+						smooth: true,
 
-						startMaterial : function( name, libraries ) {
+						startMaterial: function startMaterial(name, libraries) {
 
-							var previous = this._finalize( false );
+							var previous = this._finalize(false);
 
 							// New usemtl declaration overwrites an inherited material, except if faces were declared
 							// after the material, then it must be preserved for proper MultiMaterial continuation.
-							if ( previous && ( previous.inherited || previous.groupCount <= 0 ) ) {
+							if (previous && (previous.inherited || previous.groupCount <= 0)) {
 
-								this.materials.splice( previous.index, 1 );
-
+								this.materials.splice(previous.index, 1);
 							}
 
 							var material = {
-								index      : this.materials.length,
-								name       : name || '',
-								mtllib     : ( Array.isArray( libraries ) && libraries.length > 0 ? libraries[ libraries.length - 1 ] : '' ),
-								smooth     : ( previous !== undefined ? previous.smooth : this.smooth ),
-								groupStart : ( previous !== undefined ? previous.groupEnd : 0 ),
-								groupEnd   : -1,
-								groupCount : -1,
-								inherited  : false,
+								index: this.materials.length,
+								name: name || '',
+								mtllib: Array.isArray(libraries) && libraries.length > 0 ? libraries[libraries.length - 1] : '',
+								smooth: previous !== undefined ? previous.smooth : this.smooth,
+								groupStart: previous !== undefined ? previous.groupEnd : 0,
+								groupEnd: -1,
+								groupCount: -1,
+								inherited: false,
 
-								clone : function( index ) {
+								clone: function clone(index) {
 									return {
-										index      : ( typeof index === 'number' ? index : this.index ),
-										name       : this.name,
-										mtllib     : this.mtllib,
-										smooth     : this.smooth,
-										groupStart : this.groupEnd,
-										groupEnd   : -1,
-										groupCount : -1,
-										inherited  : false
+										index: typeof index === 'number' ? index : this.index,
+										name: this.name,
+										mtllib: this.mtllib,
+										smooth: this.smooth,
+										groupStart: this.groupEnd,
+										groupEnd: -1,
+										groupCount: -1,
+										inherited: false
 									};
 								}
 							};
 
-							this.materials.push( material );
+							this.materials.push(material);
 
 							return material;
-
 						},
 
-						currentMaterial : function() {
+						currentMaterial: function currentMaterial() {
 
-							if ( this.materials.length > 0 ) {
-								return this.materials[ this.materials.length - 1 ];
+							if (this.materials.length > 0) {
+								return this.materials[this.materials.length - 1];
 							}
 
 							return undefined;
-
 						},
 
-						_finalize : function( end ) {
+						_finalize: function _finalize(end) {
 
 							var lastMultiMaterial = this.currentMaterial();
-							if ( lastMultiMaterial && lastMultiMaterial.groupEnd === -1 ) {
+							if (lastMultiMaterial && lastMultiMaterial.groupEnd === -1) {
 
 								lastMultiMaterial.groupEnd = this.geometry.vertices.length / 3;
 								lastMultiMaterial.groupCount = lastMultiMaterial.groupEnd - lastMultiMaterial.groupStart;
 								lastMultiMaterial.inherited = false;
-
 							}
 
 							// Guarantee at least one empty material, this makes the creation later more straight forward.
-							if ( end !== false && this.materials.length === 0 ) {
+							if (end !== false && this.materials.length === 0) {
 								this.materials.push({
-									name   : '',
-									smooth : this.smooth
+									name: '',
+									smooth: this.smooth
 								});
 							}
 
 							return lastMultiMaterial;
-
 						}
 					};
 
@@ -657,394 +655,329 @@ module.exports = function( THREE ){
 					// overwrite the inherited material. Exception being that there was already face declarations
 					// to the inherited material, then it will be preserved for proper MultiMaterial continuation.
 
-					if ( previousMaterial && previousMaterial.name && typeof previousMaterial.clone === "function" ) {
+					if (previousMaterial && previousMaterial.name && typeof previousMaterial.clone === "function") {
 
-						var declared = previousMaterial.clone( 0 );
+						var declared = previousMaterial.clone(0);
 						declared.inherited = true;
-						this.object.materials.push( declared );
-
+						this.object.materials.push(declared);
 					}
 
-					this.objects.push( this.object );
-
+					this.objects.push(this.object);
 				},
 
-				finalize : function() {
+				finalize: function finalize() {
 
-					if ( this.object && typeof this.object._finalize === 'function' ) {
+					if (this.object && typeof this.object._finalize === 'function') {
 
 						this.object._finalize();
-
 					}
-
 				},
 
-				parseVertexIndex: function ( value, len ) {
+				parseVertexIndex: function parseVertexIndex(value, len) {
 
-					var index = parseInt( value, 10 );
-					return ( index >= 0 ? index - 1 : index + len / 3 ) * 3;
-
+					var index = parseInt(value, 10);
+					return (index >= 0 ? index - 1 : index + len / 3) * 3;
 				},
 
-				parseNormalIndex: function ( value, len ) {
+				parseNormalIndex: function parseNormalIndex(value, len) {
 
-					var index = parseInt( value, 10 );
-					return ( index >= 0 ? index - 1 : index + len / 3 ) * 3;
-
+					var index = parseInt(value, 10);
+					return (index >= 0 ? index - 1 : index + len / 3) * 3;
 				},
 
-				parseUVIndex: function ( value, len ) {
+				parseUVIndex: function parseUVIndex(value, len) {
 
-					var index = parseInt( value, 10 );
-					return ( index >= 0 ? index - 1 : index + len / 2 ) * 2;
-
+					var index = parseInt(value, 10);
+					return (index >= 0 ? index - 1 : index + len / 2) * 2;
 				},
 
-				addVertex: function ( a, b, c ) {
+				addVertex: function addVertex(a, b, c) {
 
 					var src = this.vertices;
 					var dst = this.object.geometry.vertices;
 
-					dst.push( src[ a + 0 ] );
-					dst.push( src[ a + 1 ] );
-					dst.push( src[ a + 2 ] );
-					dst.push( src[ b + 0 ] );
-					dst.push( src[ b + 1 ] );
-					dst.push( src[ b + 2 ] );
-					dst.push( src[ c + 0 ] );
-					dst.push( src[ c + 1 ] );
-					dst.push( src[ c + 2 ] );
-
+					dst.push(src[a + 0]);
+					dst.push(src[a + 1]);
+					dst.push(src[a + 2]);
+					dst.push(src[b + 0]);
+					dst.push(src[b + 1]);
+					dst.push(src[b + 2]);
+					dst.push(src[c + 0]);
+					dst.push(src[c + 1]);
+					dst.push(src[c + 2]);
 				},
 
-				addVertexLine: function ( a ) {
+				addVertexLine: function addVertexLine(a) {
 
 					var src = this.vertices;
 					var dst = this.object.geometry.vertices;
 
-					dst.push( src[ a + 0 ] );
-					dst.push( src[ a + 1 ] );
-					dst.push( src[ a + 2 ] );
-
+					dst.push(src[a + 0]);
+					dst.push(src[a + 1]);
+					dst.push(src[a + 2]);
 				},
 
-				addNormal : function ( a, b, c ) {
+				addNormal: function addNormal(a, b, c) {
 
 					var src = this.normals;
 					var dst = this.object.geometry.normals;
 
-					dst.push( src[ a + 0 ] );
-					dst.push( src[ a + 1 ] );
-					dst.push( src[ a + 2 ] );
-					dst.push( src[ b + 0 ] );
-					dst.push( src[ b + 1 ] );
-					dst.push( src[ b + 2 ] );
-					dst.push( src[ c + 0 ] );
-					dst.push( src[ c + 1 ] );
-					dst.push( src[ c + 2 ] );
-
+					dst.push(src[a + 0]);
+					dst.push(src[a + 1]);
+					dst.push(src[a + 2]);
+					dst.push(src[b + 0]);
+					dst.push(src[b + 1]);
+					dst.push(src[b + 2]);
+					dst.push(src[c + 0]);
+					dst.push(src[c + 1]);
+					dst.push(src[c + 2]);
 				},
 
-				addUV: function ( a, b, c ) {
+				addUV: function addUV(a, b, c) {
 
 					var src = this.uvs;
 					var dst = this.object.geometry.uvs;
 
-					dst.push( src[ a + 0 ] );
-					dst.push( src[ a + 1 ] );
-					dst.push( src[ b + 0 ] );
-					dst.push( src[ b + 1 ] );
-					dst.push( src[ c + 0 ] );
-					dst.push( src[ c + 1 ] );
-
+					dst.push(src[a + 0]);
+					dst.push(src[a + 1]);
+					dst.push(src[b + 0]);
+					dst.push(src[b + 1]);
+					dst.push(src[c + 0]);
+					dst.push(src[c + 1]);
 				},
 
-				addUVLine: function ( a ) {
+				addUVLine: function addUVLine(a) {
 
 					var src = this.uvs;
 					var dst = this.object.geometry.uvs;
 
-					dst.push( src[ a + 0 ] );
-					dst.push( src[ a + 1 ] );
-
+					dst.push(src[a + 0]);
+					dst.push(src[a + 1]);
 				},
 
-				addFace: function ( a, b, c, d, ua, ub, uc, ud, na, nb, nc, nd ) {
+				addFace: function addFace(a, b, c, d, ua, ub, uc, ud, na, nb, nc, nd) {
 
 					var vLen = this.vertices.length;
 
-					var ia = this.parseVertexIndex( a, vLen );
-					var ib = this.parseVertexIndex( b, vLen );
-					var ic = this.parseVertexIndex( c, vLen );
+					var ia = this.parseVertexIndex(a, vLen);
+					var ib = this.parseVertexIndex(b, vLen);
+					var ic = this.parseVertexIndex(c, vLen);
 					var id;
 
-					if ( d === undefined ) {
+					if (d === undefined) {
 
-						this.addVertex( ia, ib, ic );
-
+						this.addVertex(ia, ib, ic);
 					} else {
 
-						id = this.parseVertexIndex( d, vLen );
+						id = this.parseVertexIndex(d, vLen);
 
-						this.addVertex( ia, ib, id );
-						this.addVertex( ib, ic, id );
-
+						this.addVertex(ia, ib, id);
+						this.addVertex(ib, ic, id);
 					}
 
-					if ( ua !== undefined ) {
+					if (ua !== undefined) {
 
 						var uvLen = this.uvs.length;
 
-						ia = this.parseUVIndex( ua, uvLen );
-						ib = this.parseUVIndex( ub, uvLen );
-						ic = this.parseUVIndex( uc, uvLen );
+						ia = this.parseUVIndex(ua, uvLen);
+						ib = this.parseUVIndex(ub, uvLen);
+						ic = this.parseUVIndex(uc, uvLen);
 
-						if ( d === undefined ) {
+						if (d === undefined) {
 
-							this.addUV( ia, ib, ic );
-
+							this.addUV(ia, ib, ic);
 						} else {
 
-							id = this.parseUVIndex( ud, uvLen );
+							id = this.parseUVIndex(ud, uvLen);
 
-							this.addUV( ia, ib, id );
-							this.addUV( ib, ic, id );
-
+							this.addUV(ia, ib, id);
+							this.addUV(ib, ic, id);
 						}
-
 					}
 
-					if ( na !== undefined ) {
+					if (na !== undefined) {
 
 						// Normals are many times the same. If so, skip function call and parseInt.
 						var nLen = this.normals.length;
-						ia = this.parseNormalIndex( na, nLen );
+						ia = this.parseNormalIndex(na, nLen);
 
-						ib = na === nb ? ia : this.parseNormalIndex( nb, nLen );
-						ic = na === nc ? ia : this.parseNormalIndex( nc, nLen );
+						ib = na === nb ? ia : this.parseNormalIndex(nb, nLen);
+						ic = na === nc ? ia : this.parseNormalIndex(nc, nLen);
 
-						if ( d === undefined ) {
+						if (d === undefined) {
 
-							this.addNormal( ia, ib, ic );
-
+							this.addNormal(ia, ib, ic);
 						} else {
 
-							id = this.parseNormalIndex( nd, nLen );
+							id = this.parseNormalIndex(nd, nLen);
 
-							this.addNormal( ia, ib, id );
-							this.addNormal( ib, ic, id );
-
+							this.addNormal(ia, ib, id);
+							this.addNormal(ib, ic, id);
 						}
-
 					}
-
 				},
 
-				addLineGeometry: function ( vertices, uvs ) {
+				addLineGeometry: function addLineGeometry(vertices, uvs) {
 
 					this.object.geometry.type = 'Line';
 
 					var vLen = this.vertices.length;
 					var uvLen = this.uvs.length;
 
-					for ( var vi = 0, l = vertices.length; vi < l; vi ++ ) {
+					for (var vi = 0, l = vertices.length; vi < l; vi++) {
 
-						this.addVertexLine( this.parseVertexIndex( vertices[ vi ], vLen ) );
-
+						this.addVertexLine(this.parseVertexIndex(vertices[vi], vLen));
 					}
 
-					for ( var uvi = 0, l = uvs.length; uvi < l; uvi ++ ) {
+					for (var uvi = 0, l = uvs.length; uvi < l; uvi++) {
 
-						this.addUVLine( this.parseUVIndex( uvs[ uvi ], uvLen ) );
-
+						this.addUVLine(this.parseUVIndex(uvs[uvi], uvLen));
 					}
-
 				}
 
 			};
 
-			state.startObject( '', false );
+			state.startObject('', false);
 
 			return state;
-
 		},
 
-		parse: function ( text ) {
+		parse: function parse(text) {
 
-			console.time( 'OBJLoader' );
+			console.time('OBJLoader');
 
 			var state = this._createParserState();
 
-			if ( text.indexOf( '\r\n' ) !== - 1 ) {
+			if (text.indexOf('\r\n') !== -1) {
 
 				// This is faster than String.split with regex that splits on both
-				text = text.replace( '\r\n', '\n' );
-
+				text = text.replace('\r\n', '\n');
 			}
 
-			var lines = text.split( '\n' );
-			var line = '', lineFirstChar = '', lineSecondChar = '';
+			var lines = text.split('\n');
+			var line = '',
+			    lineFirstChar = '',
+			    lineSecondChar = '';
 			var lineLength = 0;
 			var result = [];
 
 			// Faster to just trim left side of the line. Use if available.
-			var trimLeft = ( typeof ''.trimLeft === 'function' );
+			var trimLeft = typeof ''.trimLeft === 'function';
 
-			for ( var i = 0, l = lines.length; i < l; i ++ ) {
+			for (var i = 0, l = lines.length; i < l; i++) {
 
-				line = lines[ i ];
+				line = lines[i];
 
 				line = trimLeft ? line.trimLeft() : line.trim();
 
 				lineLength = line.length;
 
-				if ( lineLength === 0 ) continue;
+				if (lineLength === 0) continue;
 
-				lineFirstChar = line.charAt( 0 );
+				lineFirstChar = line.charAt(0);
 
 				// @todo invoke passed in handler if any
-				if ( lineFirstChar === '#' ) continue;
+				if (lineFirstChar === '#') continue;
 
-				if ( lineFirstChar === 'v' ) {
+				if (lineFirstChar === 'v') {
 
-					lineSecondChar = line.charAt( 1 );
+					lineSecondChar = line.charAt(1);
 
-					if ( lineSecondChar === ' ' && ( result = this.regexp.vertex_pattern.exec( line ) ) !== null ) {
+					if (lineSecondChar === ' ' && (result = this.regexp.vertex_pattern.exec(line)) !== null) {
 
 						// 0                  1      2      3
 						// ["v 1.0 2.0 3.0", "1.0", "2.0", "3.0"]
 
-						state.vertices.push(
-							parseFloat( result[ 1 ] ),
-							parseFloat( result[ 2 ] ),
-							parseFloat( result[ 3 ] )
-						);
-
-					} else if ( lineSecondChar === 'n' && ( result = this.regexp.normal_pattern.exec( line ) ) !== null ) {
+						state.vertices.push(parseFloat(result[1]), parseFloat(result[2]), parseFloat(result[3]));
+					} else if (lineSecondChar === 'n' && (result = this.regexp.normal_pattern.exec(line)) !== null) {
 
 						// 0                   1      2      3
 						// ["vn 1.0 2.0 3.0", "1.0", "2.0", "3.0"]
 
-						state.normals.push(
-							parseFloat( result[ 1 ] ),
-							parseFloat( result[ 2 ] ),
-							parseFloat( result[ 3 ] )
-						);
-
-					} else if ( lineSecondChar === 't' && ( result = this.regexp.uv_pattern.exec( line ) ) !== null ) {
+						state.normals.push(parseFloat(result[1]), parseFloat(result[2]), parseFloat(result[3]));
+					} else if (lineSecondChar === 't' && (result = this.regexp.uv_pattern.exec(line)) !== null) {
 
 						// 0               1      2
 						// ["vt 0.1 0.2", "0.1", "0.2"]
 
-						state.uvs.push(
-							parseFloat( result[ 1 ] ),
-							parseFloat( result[ 2 ] )
-						);
-
+						state.uvs.push(parseFloat(result[1]), parseFloat(result[2]));
 					} else {
 
-						throw new Error( "Unexpected vertex/normal/uv line: '" + line  + "'" );
-
+						throw new Error("Unexpected vertex/normal/uv line: '" + line + "'");
 					}
+				} else if (lineFirstChar === "f") {
 
-				} else if ( lineFirstChar === "f" ) {
-
-					if ( ( result = this.regexp.face_vertex_uv_normal.exec( line ) ) !== null ) {
+					if ((result = this.regexp.face_vertex_uv_normal.exec(line)) !== null) {
 
 						// f vertex/uv/normal vertex/uv/normal vertex/uv/normal
 						// 0                        1    2    3    4    5    6    7    8    9   10         11         12
 						// ["f 1/1/1 2/2/2 3/3/3", "1", "1", "1", "2", "2", "2", "3", "3", "3", undefined, undefined, undefined]
 
-						state.addFace(
-							result[ 1 ], result[ 4 ], result[ 7 ], result[ 10 ],
-							result[ 2 ], result[ 5 ], result[ 8 ], result[ 11 ],
-							result[ 3 ], result[ 6 ], result[ 9 ], result[ 12 ]
-						);
-
-					} else if ( ( result = this.regexp.face_vertex_uv.exec( line ) ) !== null ) {
+						state.addFace(result[1], result[4], result[7], result[10], result[2], result[5], result[8], result[11], result[3], result[6], result[9], result[12]);
+					} else if ((result = this.regexp.face_vertex_uv.exec(line)) !== null) {
 
 						// f vertex/uv vertex/uv vertex/uv
 						// 0                  1    2    3    4    5    6   7          8
 						// ["f 1/1 2/2 3/3", "1", "1", "2", "2", "3", "3", undefined, undefined]
 
-						state.addFace(
-							result[ 1 ], result[ 3 ], result[ 5 ], result[ 7 ],
-							result[ 2 ], result[ 4 ], result[ 6 ], result[ 8 ]
-						);
-
-					} else if ( ( result = this.regexp.face_vertex_normal.exec( line ) ) !== null ) {
+						state.addFace(result[1], result[3], result[5], result[7], result[2], result[4], result[6], result[8]);
+					} else if ((result = this.regexp.face_vertex_normal.exec(line)) !== null) {
 
 						// f vertex//normal vertex//normal vertex//normal
 						// 0                     1    2    3    4    5    6   7          8
 						// ["f 1//1 2//2 3//3", "1", "1", "2", "2", "3", "3", undefined, undefined]
 
-						state.addFace(
-							result[ 1 ], result[ 3 ], result[ 5 ], result[ 7 ],
-							undefined, undefined, undefined, undefined,
-							result[ 2 ], result[ 4 ], result[ 6 ], result[ 8 ]
-						);
-
-					} else if ( ( result = this.regexp.face_vertex.exec( line ) ) !== null ) {
+						state.addFace(result[1], result[3], result[5], result[7], undefined, undefined, undefined, undefined, result[2], result[4], result[6], result[8]);
+					} else if ((result = this.regexp.face_vertex.exec(line)) !== null) {
 
 						// f vertex vertex vertex
 						// 0            1    2    3   4
 						// ["f 1 2 3", "1", "2", "3", undefined]
 
-						state.addFace(
-							result[ 1 ], result[ 2 ], result[ 3 ], result[ 4 ]
-						);
-
+						state.addFace(result[1], result[2], result[3], result[4]);
 					} else {
 
-						throw new Error( "Unexpected face line: '" + line  + "'" );
-
+						throw new Error("Unexpected face line: '" + line + "'");
 					}
+				} else if (lineFirstChar === "l") {
 
-				} else if ( lineFirstChar === "l" ) {
+					var lineParts = line.substring(1).trim().split(" ");
+					var lineVertices = [],
+					    lineUVs = [];
 
-					var lineParts = line.substring( 1 ).trim().split( " " );
-					var lineVertices = [], lineUVs = [];
-
-					if ( line.indexOf( "/" ) === - 1 ) {
+					if (line.indexOf("/") === -1) {
 
 						lineVertices = lineParts;
-
 					} else {
 
-						for ( var li = 0, llen = lineParts.length; li < llen; li ++ ) {
+						for (var li = 0, llen = lineParts.length; li < llen; li++) {
 
-							var parts = lineParts[ li ].split( "/" );
+							var parts = lineParts[li].split("/");
 
-							if ( parts[ 0 ] !== "" ) lineVertices.push( parts[ 0 ] );
-							if ( parts[ 1 ] !== "" ) lineUVs.push( parts[ 1 ] );
-
+							if (parts[0] !== "") lineVertices.push(parts[0]);
+							if (parts[1] !== "") lineUVs.push(parts[1]);
 						}
-
 					}
-					state.addLineGeometry( lineVertices, lineUVs );
-
-				} else if ( ( result = this.regexp.object_pattern.exec( line ) ) !== null ) {
+					state.addLineGeometry(lineVertices, lineUVs);
+				} else if ((result = this.regexp.object_pattern.exec(line)) !== null) {
 
 					// o object_name
 					// or
 					// g group_name
 
-					var name = result[ 0 ].substr( 1 ).trim();
-					state.startObject( name );
-
-				} else if ( this.regexp.material_use_pattern.test( line ) ) {
+					var name = result[0].substr(1).trim();
+					state.startObject(name);
+				} else if (this.regexp.material_use_pattern.test(line)) {
 
 					// material
 
-					state.object.startMaterial( line.substring( 7 ).trim(), state.materialLibraries );
-
-				} else if ( this.regexp.material_library_pattern.test( line ) ) {
+					state.object.startMaterial(line.substring(7).trim(), state.materialLibraries);
+				} else if (this.regexp.material_library_pattern.test(line)) {
 
 					// mtl file
 
-					state.materialLibraries.push( line.substring( 7 ).trim() );
-
-				} else if ( ( result = this.regexp.smoothing_pattern.exec( line ) ) !== null ) {
+					state.materialLibraries.push(line.substring(7).trim());
+				} else if ((result = this.regexp.smoothing_pattern.exec(line)) !== null) {
 
 					// smooth shading
 
@@ -1055,174 +988,159 @@ module.exports = function( THREE ){
 					// where explicit usemtl defines geometry groups.
 					// Example asset: examples/models/obj/cerberus/Cerberus.obj
 
-					var value = result[ 1 ].trim().toLowerCase();
-					state.object.smooth = ( value === '1' || value === 'on' );
+					var value = result[1].trim().toLowerCase();
+					state.object.smooth = value === '1' || value === 'on';
 
 					var material = state.object.currentMaterial();
-					if ( material ) {
+					if (material) {
 
 						material.smooth = state.object.smooth;
-
 					}
-
 				} else {
 
 					// Handle null terminated files without exception
-					if ( line === '\0' ) continue;
+					if (line === '\0') continue;
 
-					throw new Error( "Unexpected line: '" + line  + "'" );
-
+					throw new Error("Unexpected line: '" + line + "'");
 				}
-
 			}
 
 			state.finalize();
 
 			var container = new THREE.Group();
-			container.materialLibraries = [].concat( state.materialLibraries );
+			container.materialLibraries = [].concat(state.materialLibraries);
 
-			for ( var i = 0, l = state.objects.length; i < l; i ++ ) {
+			for (var i = 0, l = state.objects.length; i < l; i++) {
 
-				var object = state.objects[ i ];
+				var object = state.objects[i];
 				var geometry = object.geometry;
 				var materials = object.materials;
-				var isLine = ( geometry.type === 'Line' );
+				var isLine = geometry.type === 'Line';
 
 				// Skip o/g line declarations that did not follow with any faces
-				if ( geometry.vertices.length === 0 ) continue;
+				if (geometry.vertices.length === 0) continue;
 
 				var buffergeometry = new THREE.BufferGeometry();
 
-				buffergeometry.addAttribute( 'position', new THREE.BufferAttribute( new Float32Array( geometry.vertices ), 3 ) );
+				buffergeometry.addAttribute('position', new THREE.BufferAttribute(new Float32Array(geometry.vertices), 3));
 
-				if ( geometry.normals.length > 0 ) {
+				if (geometry.normals.length > 0) {
 
-					buffergeometry.addAttribute( 'normal', new THREE.BufferAttribute( new Float32Array( geometry.normals ), 3 ) );
-
+					buffergeometry.addAttribute('normal', new THREE.BufferAttribute(new Float32Array(geometry.normals), 3));
 				} else {
 
 					buffergeometry.computeVertexNormals();
-
 				}
 
-				if ( geometry.uvs.length > 0 ) {
+				if (geometry.uvs.length > 0) {
 
-					buffergeometry.addAttribute( 'uv', new THREE.BufferAttribute( new Float32Array( geometry.uvs ), 2 ) );
-
+					buffergeometry.addAttribute('uv', new THREE.BufferAttribute(new Float32Array(geometry.uvs), 2));
 				}
 
 				// Create materials
 
 				var createdMaterials = [];
 
-				for ( var mi = 0, miLen = materials.length; mi < miLen ; mi++ ) {
+				for (var mi = 0, miLen = materials.length; mi < miLen; mi++) {
 
 					var sourceMaterial = materials[mi];
 					var material = undefined;
 
-					if ( this.materials !== null ) {
+					if (this.materials !== null) {
 
-						material = this.materials.create( sourceMaterial.name );
+						material = this.materials.create(sourceMaterial.name);
 
 						// mtl etc. loaders probably can't create line materials correctly, copy properties to a line material.
-						if ( isLine && material && ! ( material instanceof THREE.LineBasicMaterial ) ) {
+						if (isLine && material && !(material instanceof THREE.LineBasicMaterial)) {
 
 							var materialLine = new THREE.LineBasicMaterial();
-							materialLine.copy( material );
+							materialLine.copy(material);
 							material = materialLine;
-
 						}
-
 					}
 
-					if ( ! material ) {
+					if (!material) {
 
-						material = ( ! isLine ? new THREE.MeshPhongMaterial() : new THREE.LineBasicMaterial() );
+						material = !isLine ? new THREE.MeshPhongMaterial() : new THREE.LineBasicMaterial();
 						material.name = sourceMaterial.name;
-
 					}
 
 					material.shading = sourceMaterial.smooth ? THREE.SmoothShading : THREE.FlatShading;
 
 					createdMaterials.push(material);
-
 				}
 
 				// Create mesh
 
 				var mesh;
 
-				if ( createdMaterials.length > 1 ) {
+				if (createdMaterials.length > 1) {
 
-					for ( var mi = 0, miLen = materials.length; mi < miLen ; mi++ ) {
+					for (var mi = 0, miLen = materials.length; mi < miLen; mi++) {
 
 						var sourceMaterial = materials[mi];
-						buffergeometry.addGroup( sourceMaterial.groupStart, sourceMaterial.groupCount, mi );
-
+						buffergeometry.addGroup(sourceMaterial.groupStart, sourceMaterial.groupCount, mi);
 					}
 
-					var multiMaterial = new THREE.MultiMaterial( createdMaterials );
-					mesh = ( ! isLine ? new THREE.Mesh( buffergeometry, multiMaterial ) : new THREE.LineSegments( buffergeometry, multiMaterial ) );
-
+					var multiMaterial = new THREE.MultiMaterial(createdMaterials);
+					mesh = !isLine ? new THREE.Mesh(buffergeometry, multiMaterial) : new THREE.LineSegments(buffergeometry, multiMaterial);
 				} else {
 
-					mesh = ( ! isLine ? new THREE.Mesh( buffergeometry, createdMaterials[ 0 ] ) : new THREE.LineSegments( buffergeometry, createdMaterials[ 0 ] ) );
+					mesh = !isLine ? new THREE.Mesh(buffergeometry, createdMaterials[0]) : new THREE.LineSegments(buffergeometry, createdMaterials[0]);
 				}
 
 				mesh.name = object.name;
 
-				container.add( mesh );
-
+				container.add(mesh);
 			}
 
-			console.timeEnd( 'OBJLoader' );
+			console.timeEnd('OBJLoader');
 
 			return container;
-
 		}
 
 	};
-}
+};
+
 },{}],4:[function(require,module,exports){
+'use strict';
+
 /**
  * @author mrdoob / http://mrdoob.com
  * @author stewdio / http://stewd.io
  */
-module.exports = function( THREE ){
-  THREE.ViveController = function ( id ) {
+module.exports = function (THREE) {
+  THREE.ViveController = function (id) {
 
-    THREE.Object3D.call( this );
+    THREE.Object3D.call(this);
 
     var scope = this;
     var gamepad;
 
-    var axes = [ 0, 0 ];
+    var axes = [0, 0];
     var thumbpadIsPressed = false;
     var triggerIsPressed = false;
     var gripsArePressed = false;
     var menuIsPressed = false;
 
-    function findGamepad( id ) {
+    function findGamepad(id) {
 
       // Iterate across gamepads as Vive Controllers may not be
       // in position 0 and 1.
 
       var gamepads = navigator.getGamepads();
 
-      for ( var i = 0, j = 0; i < 4; i ++ ) {
+      for (var i = 0, j = 0; i < 4; i++) {
 
-        var gamepad = gamepads[ i ];
+        var gamepad = gamepads[i];
 
-        if ( gamepad && gamepad.id === 'OpenVR Gamepad' ) {
+        if (gamepad && gamepad.id === 'OpenVR Gamepad') {
 
-          if ( j === id ) return gamepad;
+          if (j === id) return gamepad;
 
-          j ++;
-
+          j++;
         }
-
       }
-
     }
 
     this.matrixAutoUpdate = false;
@@ -1231,94 +1149,86 @@ module.exports = function( THREE ){
     this.getGamepad = function () {
 
       return gamepad;
-
     };
 
-    this.getButtonState = function ( button ) {
+    this.getButtonState = function (button) {
 
-      if ( button === 'thumbpad' ) return thumbpadIsPressed;
-      if ( button === 'trigger' ) return triggerIsPressed;
-      if ( button === 'grips' ) return gripsArePressed;
-      if ( button === 'menu' ) return menuIsPressed;
-
+      if (button === 'thumbpad') return thumbpadIsPressed;
+      if (button === 'trigger') return triggerIsPressed;
+      if (button === 'grips') return gripsArePressed;
+      if (button === 'menu') return menuIsPressed;
     };
 
     this.update = function () {
 
-      gamepad = findGamepad( id );
+      gamepad = findGamepad(id);
 
-      if ( gamepad !== undefined && gamepad.pose !== null ) {
+      if (gamepad !== undefined && gamepad.pose !== null) {
 
         //  Position and orientation.
 
         var pose = gamepad.pose;
 
-        if ( pose.position !== null ) scope.position.fromArray( pose.position );
-        if ( pose.orientation !== null ) scope.quaternion.fromArray( pose.orientation );
-        scope.matrix.compose( scope.position, scope.quaternion, scope.scale );
-        scope.matrix.multiplyMatrices( scope.standingMatrix, scope.matrix );
+        if (pose.position !== null) scope.position.fromArray(pose.position);
+        if (pose.orientation !== null) scope.quaternion.fromArray(pose.orientation);
+        scope.matrix.compose(scope.position, scope.quaternion, scope.scale);
+        scope.matrix.multiplyMatrices(scope.standingMatrix, scope.matrix);
         scope.matrixWorldNeedsUpdate = true;
         scope.visible = true;
 
         //  Thumbpad and Buttons.
 
-        if ( axes[ 0 ] !== gamepad.axes[ 0 ] || axes[ 1 ] !== gamepad.axes[ 1 ] ) {
+        if (axes[0] !== gamepad.axes[0] || axes[1] !== gamepad.axes[1]) {
 
-          axes[ 0 ] = gamepad.axes[ 0 ]; //  X axis: -1 = Left, +1 = Right.
-          axes[ 1 ] = gamepad.axes[ 1 ]; //  Y axis: -1 = Bottom, +1 = Top.
-          scope.dispatchEvent( { type: 'axischanged', axes: axes } );
-
+          axes[0] = gamepad.axes[0]; //  X axis: -1 = Left, +1 = Right.
+          axes[1] = gamepad.axes[1]; //  Y axis: -1 = Bottom, +1 = Top.
+          scope.dispatchEvent({ type: 'axischanged', axes: axes });
         }
 
-        if ( thumbpadIsPressed !== gamepad.buttons[ 0 ].pressed ) {
+        if (thumbpadIsPressed !== gamepad.buttons[0].pressed) {
 
-          thumbpadIsPressed = gamepad.buttons[ 0 ].pressed;
-          scope.dispatchEvent( { type: thumbpadIsPressed ? 'thumbpaddown' : 'thumbpadup' } );
-
+          thumbpadIsPressed = gamepad.buttons[0].pressed;
+          scope.dispatchEvent({ type: thumbpadIsPressed ? 'thumbpaddown' : 'thumbpadup' });
         }
 
-        if ( triggerIsPressed !== gamepad.buttons[ 1 ].pressed ) {
+        if (triggerIsPressed !== gamepad.buttons[1].pressed) {
 
-          triggerIsPressed = gamepad.buttons[ 1 ].pressed;
-          scope.dispatchEvent( { type: triggerIsPressed ? 'triggerdown' : 'triggerup' } );
-
+          triggerIsPressed = gamepad.buttons[1].pressed;
+          scope.dispatchEvent({ type: triggerIsPressed ? 'triggerdown' : 'triggerup' });
         }
 
-        if ( gripsArePressed !== gamepad.buttons[ 2 ].pressed ) {
+        if (gripsArePressed !== gamepad.buttons[2].pressed) {
 
-          gripsArePressed = gamepad.buttons[ 2 ].pressed;
-          scope.dispatchEvent( { type: gripsArePressed ? 'gripsdown' : 'gripsup' } );
-
+          gripsArePressed = gamepad.buttons[2].pressed;
+          scope.dispatchEvent({ type: gripsArePressed ? 'gripsdown' : 'gripsup' });
         }
 
-        if ( menuIsPressed !== gamepad.buttons[ 3 ].pressed ) {
+        if (menuIsPressed !== gamepad.buttons[3].pressed) {
 
-          menuIsPressed = gamepad.buttons[ 3 ].pressed;
-          scope.dispatchEvent( { type: menuIsPressed ? 'menudown' : 'menuup' } );
-
+          menuIsPressed = gamepad.buttons[3].pressed;
+          scope.dispatchEvent({ type: menuIsPressed ? 'menudown' : 'menuup' });
         }
-
       } else {
 
         scope.visible = false;
-
       }
-
     };
-
   };
 
-  THREE.ViveController.prototype = Object.create( THREE.Object3D.prototype );
+  THREE.ViveController.prototype = Object.create(THREE.Object3D.prototype);
   THREE.ViveController.prototype.constructor = THREE.ViveController;
-}
+};
+
 },{}],5:[function(require,module,exports){
+'use strict';
+
 /**
  * @author dmarcos / https://github.com/dmarcos
  * @author mrdoob / http://mrdoob.com
  */
 
-module.exports = function( THREE ){
-	THREE.VRControls = function ( object, onError ) {
+module.exports = function (THREE) {
+	THREE.VRControls = function (object, onError) {
 
 		var scope = this;
 
@@ -1326,39 +1236,32 @@ module.exports = function( THREE ){
 
 		var standingMatrix = new THREE.Matrix4();
 
-		function gotVRDisplays( displays ) {
+		function gotVRDisplays(displays) {
 
 			vrDisplays = displays;
 
-			for ( var i = 0; i < displays.length; i ++ ) {
+			for (var i = 0; i < displays.length; i++) {
 
-				if ( ( 'VRDisplay' in window && displays[ i ] instanceof VRDisplay ) ||
-					 ( 'PositionSensorVRDevice' in window && displays[ i ] instanceof PositionSensorVRDevice ) ) {
+				if ('VRDisplay' in window && displays[i] instanceof VRDisplay || 'PositionSensorVRDevice' in window && displays[i] instanceof PositionSensorVRDevice) {
 
-					vrDisplay = displays[ i ];
-					break;  // We keep the first we encounter
-
+					vrDisplay = displays[i];
+					break; // We keep the first we encounter
 				}
-
 			}
 
-			if ( vrDisplay === undefined ) {
+			if (vrDisplay === undefined) {
 
-				if ( onError ) onError( 'VR input not available.' );
-
+				if (onError) onError('VR input not available.');
 			}
-
 		}
 
-		if ( navigator.getVRDisplays ) {
+		if (navigator.getVRDisplays) {
 
-			navigator.getVRDisplays().then( gotVRDisplays );
-
-		} else if ( navigator.getVRDevices ) {
+			navigator.getVRDisplays().then(gotVRDisplays);
+		} else if (navigator.getVRDevices) {
 
 			// Deprecated API.
-			navigator.getVRDevices().then( gotVRDisplays );
-
+			navigator.getVRDevices().then(gotVRDisplays);
 		}
 
 		// the Rift SDK returns the position in meters
@@ -1378,138 +1281,116 @@ module.exports = function( THREE ){
 		this.getVRDisplay = function () {
 
 			return vrDisplay;
-
 		};
 
 		this.getVRDisplays = function () {
 
 			return vrDisplays;
-
 		};
 
 		this.getStandingMatrix = function () {
 
 			return standingMatrix;
-
 		};
 
 		this.update = function () {
 
-			if ( vrDisplay ) {
+			if (vrDisplay) {
 
-				if ( vrDisplay.getPose ) {
+				if (vrDisplay.getPose) {
 
 					var pose = vrDisplay.getPose();
 
-					if ( pose.orientation !== null ) {
+					if (pose.orientation !== null) {
 
-						object.quaternion.fromArray( pose.orientation );
-
+						object.quaternion.fromArray(pose.orientation);
 					}
 
-					if ( pose.position !== null ) {
+					if (pose.position !== null) {
 
-						object.position.fromArray( pose.position );
-
+						object.position.fromArray(pose.position);
 					} else {
 
-						object.position.set( 0, 0, 0 );
-
+						object.position.set(0, 0, 0);
 					}
-
 				} else {
 
 					// Deprecated API.
 					var state = vrDisplay.getState();
 
-					if ( state.orientation !== null ) {
+					if (state.orientation !== null) {
 
-						object.quaternion.copy( state.orientation );
-
+						object.quaternion.copy(state.orientation);
 					}
 
-					if ( state.position !== null ) {
+					if (state.position !== null) {
 
-						object.position.copy( state.position );
-
+						object.position.copy(state.position);
 					} else {
 
-						object.position.set( 0, 0, 0 );
-
+						object.position.set(0, 0, 0);
 					}
-
 				}
 
-				if ( this.standing ) {
+				if (this.standing) {
 
-					if ( vrDisplay.stageParameters ) {
+					if (vrDisplay.stageParameters) {
 
 						object.updateMatrix();
 
-						standingMatrix.fromArray( vrDisplay.stageParameters.sittingToStandingTransform );
-						object.applyMatrix( standingMatrix );
-
+						standingMatrix.fromArray(vrDisplay.stageParameters.sittingToStandingTransform);
+						object.applyMatrix(standingMatrix);
 					} else {
 
-						object.position.setY( object.position.y + this.userHeight );
-
+						object.position.setY(object.position.y + this.userHeight);
 					}
-
 				}
 
-				object.position.multiplyScalar( scope.scale );
-
+				object.position.multiplyScalar(scope.scale);
 			}
-
 		};
 
 		this.resetPose = function () {
 
-			if ( vrDisplay ) {
+			if (vrDisplay) {
 
-				if ( vrDisplay.resetPose !== undefined ) {
+				if (vrDisplay.resetPose !== undefined) {
 
 					vrDisplay.resetPose();
-
-				} else if ( vrDisplay.resetSensor !== undefined ) {
+				} else if (vrDisplay.resetSensor !== undefined) {
 
 					// Deprecated API.
 					vrDisplay.resetSensor();
-
-				} else if ( vrDisplay.zeroSensor !== undefined ) {
+				} else if (vrDisplay.zeroSensor !== undefined) {
 
 					// Really deprecated API.
 					vrDisplay.zeroSensor();
-
 				}
-
 			}
-
 		};
 
 		this.resetSensor = function () {
 
-			console.warn( 'THREE.VRControls: .resetSensor() is now .resetPose().' );
+			console.warn('THREE.VRControls: .resetSensor() is now .resetPose().');
 			this.resetPose();
-
 		};
 
 		this.zeroSensor = function () {
 
-			console.warn( 'THREE.VRControls: .zeroSensor() is now .resetPose().' );
+			console.warn('THREE.VRControls: .zeroSensor() is now .resetPose().');
 			this.resetPose();
-
 		};
 
 		this.dispose = function () {
 
 			vrDisplay = null;
-
 		};
-
 	};
-}
+};
+
 },{}],6:[function(require,module,exports){
+'use strict';
+
 /**
  * @author dmarcos / https://github.com/dmarcos
  * @author mrdoob / http://mrdoob.com
@@ -1521,8 +1402,8 @@ module.exports = function( THREE ){
  *
  */
 
-module.exports = function( THREE ){
-	THREE.VREffect = function ( renderer, onError ) {
+module.exports = function (THREE) {
+	THREE.VREffect = function (renderer, onError) {
 
 		var isWebVR1 = true;
 
@@ -1532,45 +1413,38 @@ module.exports = function( THREE ){
 		var renderRectL, renderRectR;
 		var eyeFOVL, eyeFOVR;
 
-		function gotVRDisplays( displays ) {
+		function gotVRDisplays(displays) {
 
 			vrDisplays = displays;
 
-			for ( var i = 0; i < displays.length; i ++ ) {
+			for (var i = 0; i < displays.length; i++) {
 
-				if ( 'VRDisplay' in window && displays[ i ] instanceof VRDisplay ) {
+				if ('VRDisplay' in window && displays[i] instanceof VRDisplay) {
 
-					vrDisplay = displays[ i ];
+					vrDisplay = displays[i];
 					isWebVR1 = true;
 					break; // We keep the first we encounter
+				} else if ('HMDVRDevice' in window && displays[i] instanceof HMDVRDevice) {
 
-				} else if ( 'HMDVRDevice' in window && displays[ i ] instanceof HMDVRDevice ) {
-
-					vrDisplay = displays[ i ];
+					vrDisplay = displays[i];
 					isWebVR1 = false;
 					break; // We keep the first we encounter
-
 				}
-
 			}
 
-			if ( vrDisplay === undefined ) {
+			if (vrDisplay === undefined) {
 
-				if ( onError ) onError( 'HMD not available' );
-
+				if (onError) onError('HMD not available');
 			}
-
 		}
 
-		if ( navigator.getVRDisplays ) {
+		if (navigator.getVRDisplays) {
 
-			navigator.getVRDisplays().then( gotVRDisplays );
-
-		} else if ( navigator.getVRDevices ) {
+			navigator.getVRDisplays().then(gotVRDisplays);
+		} else if (navigator.getVRDevices) {
 
 			// Deprecated API.
-			navigator.getVRDevices().then( gotVRDisplays );
-
+			navigator.getVRDevices().then(gotVRDisplays);
 		}
 
 		//
@@ -1586,41 +1460,34 @@ module.exports = function( THREE ){
 		this.getVRDisplay = function () {
 
 			return vrDisplay;
-
 		};
 
 		this.getVRDisplays = function () {
 
 			return vrDisplays;
-
 		};
 
-		this.setSize = function ( width, height ) {
+		this.setSize = function (width, height) {
 
 			rendererSize = { width: width, height: height };
 
-			if ( scope.isPresenting ) {
+			if (scope.isPresenting) {
 
-				var eyeParamsL = vrDisplay.getEyeParameters( 'left' );
-				renderer.setPixelRatio( 1 );
+				var eyeParamsL = vrDisplay.getEyeParameters('left');
+				renderer.setPixelRatio(1);
 
-				if ( isWebVR1 ) {
+				if (isWebVR1) {
 
-					renderer.setSize( eyeParamsL.renderWidth * 2, eyeParamsL.renderHeight, false );
-
+					renderer.setSize(eyeParamsL.renderWidth * 2, eyeParamsL.renderHeight, false);
 				} else {
 
-					renderer.setSize( eyeParamsL.renderRect.width * 2, eyeParamsL.renderRect.height, false );
-
+					renderer.setSize(eyeParamsL.renderRect.width * 2, eyeParamsL.renderRect.height, false);
 				}
-
 			} else {
 
-				renderer.setPixelRatio( rendererPixelRatio );
-				renderer.setSize( width, height );
-
+				renderer.setPixelRatio(rendererPixelRatio);
+				renderer.setSize(width, height);
 			}
-
 		};
 
 		// fullscreen
@@ -1629,185 +1496,154 @@ module.exports = function( THREE ){
 		var requestFullscreen;
 		var exitFullscreen;
 		var fullscreenElement;
-		var leftBounds = [ 0.0, 0.0, 0.5, 1.0 ];
-		var rightBounds = [ 0.5, 0.0, 0.5, 1.0 ];
+		var leftBounds = [0.0, 0.0, 0.5, 1.0];
+		var rightBounds = [0.5, 0.0, 0.5, 1.0];
 
 		function onFullscreenChange() {
 
 			var wasPresenting = scope.isPresenting;
-			scope.isPresenting = vrDisplay !== undefined && ( vrDisplay.isPresenting || ( ! isWebVR1 && document[ fullscreenElement ] instanceof window.HTMLElement ) );
+			scope.isPresenting = vrDisplay !== undefined && (vrDisplay.isPresenting || !isWebVR1 && document[fullscreenElement] instanceof window.HTMLElement);
 
-			if ( scope.isPresenting ) {
+			if (scope.isPresenting) {
 
-				var eyeParamsL = vrDisplay.getEyeParameters( 'left' );
+				var eyeParamsL = vrDisplay.getEyeParameters('left');
 				var eyeWidth, eyeHeight;
 
-				if ( isWebVR1 ) {
+				if (isWebVR1) {
 
 					eyeWidth = eyeParamsL.renderWidth;
 					eyeHeight = eyeParamsL.renderHeight;
 
-					if ( vrDisplay.getLayers ) {
+					if (vrDisplay.getLayers) {
 
 						var layers = vrDisplay.getLayers();
-						if ( layers.length ) {
+						if (layers.length) {
 
-							leftBounds = layers[0].leftBounds || [ 0.0, 0.0, 0.5, 1.0 ];
-							rightBounds = layers[0].rightBounds || [ 0.5, 0.0, 0.5, 1.0 ];
-
+							leftBounds = layers[0].leftBounds || [0.0, 0.0, 0.5, 1.0];
+							rightBounds = layers[0].rightBounds || [0.5, 0.0, 0.5, 1.0];
 						}
-
 					}
-
 				} else {
 
 					eyeWidth = eyeParamsL.renderRect.width;
 					eyeHeight = eyeParamsL.renderRect.height;
-
 				}
 
-				if ( !wasPresenting ) {
+				if (!wasPresenting) {
 
 					rendererPixelRatio = renderer.getPixelRatio();
 					rendererSize = renderer.getSize();
 
-					renderer.setPixelRatio( 1 );
-					renderer.setSize( eyeWidth * 2, eyeHeight, false );
-
+					renderer.setPixelRatio(1);
+					renderer.setSize(eyeWidth * 2, eyeHeight, false);
 				}
+			} else if (wasPresenting) {
 
-			} else if ( wasPresenting ) {
-
-				renderer.setPixelRatio( rendererPixelRatio );
-				renderer.setSize( rendererSize.width, rendererSize.height );
-
+				renderer.setPixelRatio(rendererPixelRatio);
+				renderer.setSize(rendererSize.width, rendererSize.height);
 			}
-
 		}
 
-		if ( canvas.requestFullscreen ) {
+		if (canvas.requestFullscreen) {
 
 			requestFullscreen = 'requestFullscreen';
 			fullscreenElement = 'fullscreenElement';
 			exitFullscreen = 'exitFullscreen';
-			document.addEventListener( 'fullscreenchange', onFullscreenChange, false );
-
-		} else if ( canvas.mozRequestFullScreen ) {
+			document.addEventListener('fullscreenchange', onFullscreenChange, false);
+		} else if (canvas.mozRequestFullScreen) {
 
 			requestFullscreen = 'mozRequestFullScreen';
 			fullscreenElement = 'mozFullScreenElement';
 			exitFullscreen = 'mozCancelFullScreen';
-			document.addEventListener( 'mozfullscreenchange', onFullscreenChange, false );
-
+			document.addEventListener('mozfullscreenchange', onFullscreenChange, false);
 		} else {
 
 			requestFullscreen = 'webkitRequestFullscreen';
 			fullscreenElement = 'webkitFullscreenElement';
 			exitFullscreen = 'webkitExitFullscreen';
-			document.addEventListener( 'webkitfullscreenchange', onFullscreenChange, false );
-
+			document.addEventListener('webkitfullscreenchange', onFullscreenChange, false);
 		}
 
-		window.addEventListener( 'vrdisplaypresentchange', onFullscreenChange, false );
+		window.addEventListener('vrdisplaypresentchange', onFullscreenChange, false);
 
-		this.setFullScreen = function ( boolean ) {
+		this.setFullScreen = function (boolean) {
 
-			return new Promise( function ( resolve, reject ) {
+			return new Promise(function (resolve, reject) {
 
-				if ( vrDisplay === undefined ) {
+				if (vrDisplay === undefined) {
 
-					reject( new Error( 'No VR hardware found.' ) );
+					reject(new Error('No VR hardware found.'));
 					return;
-
 				}
 
-				if ( scope.isPresenting === boolean ) {
+				if (scope.isPresenting === boolean) {
 
 					resolve();
 					return;
-
 				}
 
-				if ( isWebVR1 ) {
+				if (isWebVR1) {
 
-					if ( boolean ) {
+					if (boolean) {
 
-						resolve( vrDisplay.requestPresent( [ { source: canvas } ] ) );
-
+						resolve(vrDisplay.requestPresent([{ source: canvas }]));
 					} else {
 
-						resolve( vrDisplay.exitPresent() );
-
+						resolve(vrDisplay.exitPresent());
 					}
-
 				} else {
 
-					if ( canvas[ requestFullscreen ] ) {
+					if (canvas[requestFullscreen]) {
 
-						canvas[ boolean ? requestFullscreen : exitFullscreen ]( { vrDisplay: vrDisplay } );
+						canvas[boolean ? requestFullscreen : exitFullscreen]({ vrDisplay: vrDisplay });
 						resolve();
-
 					} else {
 
-						console.error( 'No compatible requestFullscreen method found.' );
-						reject( new Error( 'No compatible requestFullscreen method found.' ) );
-
+						console.error('No compatible requestFullscreen method found.');
+						reject(new Error('No compatible requestFullscreen method found.'));
 					}
-
 				}
-
-			} );
-
+			});
 		};
 
 		this.requestPresent = function () {
 
-			return this.setFullScreen( true );
-
+			return this.setFullScreen(true);
 		};
 
 		this.exitPresent = function () {
 
-			return this.setFullScreen( false );
-
+			return this.setFullScreen(false);
 		};
 
-		this.requestAnimationFrame = function ( f ) {
+		this.requestAnimationFrame = function (f) {
 
-			if ( isWebVR1 && vrDisplay !== undefined ) {
+			if (isWebVR1 && vrDisplay !== undefined) {
 
-				return vrDisplay.requestAnimationFrame( f );
-
+				return vrDisplay.requestAnimationFrame(f);
 			} else {
 
-				return window.requestAnimationFrame( f );
-
+				return window.requestAnimationFrame(f);
 			}
-
 		};
 
-		this.cancelAnimationFrame = function ( h ) {
+		this.cancelAnimationFrame = function (h) {
 
-			if ( isWebVR1 && vrDisplay !== undefined ) {
+			if (isWebVR1 && vrDisplay !== undefined) {
 
-				vrDisplay.cancelAnimationFrame( h );
-
+				vrDisplay.cancelAnimationFrame(h);
 			} else {
 
-				window.cancelAnimationFrame( h );
-
+				window.cancelAnimationFrame(h);
 			}
-
 		};
 
 		this.submitFrame = function () {
 
-			if ( isWebVR1 && vrDisplay !== undefined && scope.isPresenting ) {
+			if (isWebVR1 && vrDisplay !== undefined && scope.isPresenting) {
 
 				vrDisplay.submitFrame();
-
 			}
-
 		};
 
 		this.autoSubmitFrame = true;
@@ -1815,232 +1651,214 @@ module.exports = function( THREE ){
 		// render
 
 		var cameraL = new THREE.PerspectiveCamera();
-		cameraL.layers.enable( 1 );
+		cameraL.layers.enable(1);
 
 		var cameraR = new THREE.PerspectiveCamera();
-		cameraR.layers.enable( 2 );
+		cameraR.layers.enable(2);
 
-		this.render = function ( scene, camera, renderTarget, forceClear ) {
+		this.render = function (scene, camera, renderTarget, forceClear) {
 
-			if ( vrDisplay && scope.isPresenting ) {
+			if (vrDisplay && scope.isPresenting) {
 
 				var autoUpdate = scene.autoUpdate;
 
-				if ( autoUpdate ) {
+				if (autoUpdate) {
 
 					scene.updateMatrixWorld();
 					scene.autoUpdate = false;
-
 				}
 
-				var eyeParamsL = vrDisplay.getEyeParameters( 'left' );
-				var eyeParamsR = vrDisplay.getEyeParameters( 'right' );
+				var eyeParamsL = vrDisplay.getEyeParameters('left');
+				var eyeParamsR = vrDisplay.getEyeParameters('right');
 
-				if ( isWebVR1 ) {
+				if (isWebVR1) {
 
-					eyeTranslationL.fromArray( eyeParamsL.offset );
-					eyeTranslationR.fromArray( eyeParamsR.offset );
+					eyeTranslationL.fromArray(eyeParamsL.offset);
+					eyeTranslationR.fromArray(eyeParamsR.offset);
 					eyeFOVL = eyeParamsL.fieldOfView;
 					eyeFOVR = eyeParamsR.fieldOfView;
-
 				} else {
 
-					eyeTranslationL.copy( eyeParamsL.eyeTranslation );
-					eyeTranslationR.copy( eyeParamsR.eyeTranslation );
+					eyeTranslationL.copy(eyeParamsL.eyeTranslation);
+					eyeTranslationR.copy(eyeParamsR.eyeTranslation);
 					eyeFOVL = eyeParamsL.recommendedFieldOfView;
 					eyeFOVR = eyeParamsR.recommendedFieldOfView;
-
 				}
 
-				if ( Array.isArray( scene ) ) {
+				if (Array.isArray(scene)) {
 
-					console.warn( 'THREE.VREffect.render() no longer supports arrays. Use object.layers instead.' );
-					scene = scene[ 0 ];
-
+					console.warn('THREE.VREffect.render() no longer supports arrays. Use object.layers instead.');
+					scene = scene[0];
 				}
 
 				// When rendering we don't care what the recommended size is, only what the actual size
 				// of the backbuffer is.
 				var size = renderer.getSize();
 				renderRectL = {
-					x: Math.round( size.width * leftBounds[ 0 ] ),
-					y: Math.round( size.height * leftBounds[ 1 ] ),
-					width: Math.round( size.width * leftBounds[ 2 ] ),
-					height:  Math.round(size.height * leftBounds[ 3 ] )
+					x: Math.round(size.width * leftBounds[0]),
+					y: Math.round(size.height * leftBounds[1]),
+					width: Math.round(size.width * leftBounds[2]),
+					height: Math.round(size.height * leftBounds[3])
 				};
 				renderRectR = {
-					x: Math.round( size.width * rightBounds[ 0 ] ),
-					y: Math.round( size.height * rightBounds[ 1 ] ),
-					width: Math.round( size.width * rightBounds[ 2 ] ),
-					height:  Math.round(size.height * rightBounds[ 3 ] )
+					x: Math.round(size.width * rightBounds[0]),
+					y: Math.round(size.height * rightBounds[1]),
+					width: Math.round(size.width * rightBounds[2]),
+					height: Math.round(size.height * rightBounds[3])
 				};
 
-				if ( renderTarget ) {
+				if (renderTarget) {
 
-					renderer.setRenderTarget( renderTarget );
+					renderer.setRenderTarget(renderTarget);
 					renderTarget.scissorTest = true;
+				} else {
 
-				} else  {
-
-					renderer.setScissorTest( true );
-
+					renderer.setScissorTest(true);
 				}
 
-				if ( renderer.autoClear || forceClear ) renderer.clear();
+				if (renderer.autoClear || forceClear) renderer.clear();
 
-				if ( camera.parent === null ) camera.updateMatrixWorld();
+				if (camera.parent === null) camera.updateMatrixWorld();
 
-				cameraL.projectionMatrix = fovToProjection( eyeFOVL, true, camera.near, camera.far );
-				cameraR.projectionMatrix = fovToProjection( eyeFOVR, true, camera.near, camera.far );
+				cameraL.projectionMatrix = fovToProjection(eyeFOVL, true, camera.near, camera.far);
+				cameraR.projectionMatrix = fovToProjection(eyeFOVR, true, camera.near, camera.far);
 
-				camera.matrixWorld.decompose( cameraL.position, cameraL.quaternion, cameraL.scale );
-				camera.matrixWorld.decompose( cameraR.position, cameraR.quaternion, cameraR.scale );
+				camera.matrixWorld.decompose(cameraL.position, cameraL.quaternion, cameraL.scale);
+				camera.matrixWorld.decompose(cameraR.position, cameraR.quaternion, cameraR.scale);
 
 				var scale = this.scale;
-				cameraL.translateOnAxis( eyeTranslationL, scale );
-				cameraR.translateOnAxis( eyeTranslationR, scale );
-
+				cameraL.translateOnAxis(eyeTranslationL, scale);
+				cameraR.translateOnAxis(eyeTranslationR, scale);
 
 				// render left eye
-				if ( renderTarget ) {
+				if (renderTarget) {
 
-					renderTarget.viewport.set( renderRectL.x, renderRectL.y, renderRectL.width, renderRectL.height );
-					renderTarget.scissor.set( renderRectL.x, renderRectL.y, renderRectL.width, renderRectL.height );
-
+					renderTarget.viewport.set(renderRectL.x, renderRectL.y, renderRectL.width, renderRectL.height);
+					renderTarget.scissor.set(renderRectL.x, renderRectL.y, renderRectL.width, renderRectL.height);
 				} else {
 
-					renderer.setViewport( renderRectL.x, renderRectL.y, renderRectL.width, renderRectL.height );
-					renderer.setScissor( renderRectL.x, renderRectL.y, renderRectL.width, renderRectL.height );
-
+					renderer.setViewport(renderRectL.x, renderRectL.y, renderRectL.width, renderRectL.height);
+					renderer.setScissor(renderRectL.x, renderRectL.y, renderRectL.width, renderRectL.height);
 				}
-				renderer.render( scene, cameraL, renderTarget, forceClear );
+				renderer.render(scene, cameraL, renderTarget, forceClear);
 
 				// render right eye
-				if ( renderTarget ) {
+				if (renderTarget) {
 
-					renderTarget.viewport.set( renderRectR.x, renderRectR.y, renderRectR.width, renderRectR.height );
-					renderTarget.scissor.set( renderRectR.x, renderRectR.y, renderRectR.width, renderRectR.height );
-
+					renderTarget.viewport.set(renderRectR.x, renderRectR.y, renderRectR.width, renderRectR.height);
+					renderTarget.scissor.set(renderRectR.x, renderRectR.y, renderRectR.width, renderRectR.height);
 				} else {
 
-					renderer.setViewport( renderRectR.x, renderRectR.y, renderRectR.width, renderRectR.height );
-					renderer.setScissor( renderRectR.x, renderRectR.y, renderRectR.width, renderRectR.height );
-
+					renderer.setViewport(renderRectR.x, renderRectR.y, renderRectR.width, renderRectR.height);
+					renderer.setScissor(renderRectR.x, renderRectR.y, renderRectR.width, renderRectR.height);
 				}
-				renderer.render( scene, cameraR, renderTarget, forceClear );
+				renderer.render(scene, cameraR, renderTarget, forceClear);
 
-				if ( renderTarget ) {
+				if (renderTarget) {
 
-					renderTarget.viewport.set( 0, 0, size.width, size.height );
-					renderTarget.scissor.set( 0, 0, size.width, size.height );
+					renderTarget.viewport.set(0, 0, size.width, size.height);
+					renderTarget.scissor.set(0, 0, size.width, size.height);
 					renderTarget.scissorTest = false;
-					renderer.setRenderTarget( null );
-
+					renderer.setRenderTarget(null);
 				} else {
 
-					renderer.setScissorTest( false );
-
+					renderer.setScissorTest(false);
 				}
 
-				if ( autoUpdate ) {
+				if (autoUpdate) {
 
 					scene.autoUpdate = true;
-
 				}
 
-				if ( scope.autoSubmitFrame ) {
+				if (scope.autoSubmitFrame) {
 
 					scope.submitFrame();
-
 				}
 
 				return;
-
 			}
 
 			// Regular render mode if not HMD
 
-			renderer.render( scene, camera, renderTarget, forceClear );
-
+			renderer.render(scene, camera, renderTarget, forceClear);
 		};
 
 		//
 
-		function fovToNDCScaleOffset( fov ) {
+		function fovToNDCScaleOffset(fov) {
 
-			var pxscale = 2.0 / ( fov.leftTan + fov.rightTan );
-			var pxoffset = ( fov.leftTan - fov.rightTan ) * pxscale * 0.5;
-			var pyscale = 2.0 / ( fov.upTan + fov.downTan );
-			var pyoffset = ( fov.upTan - fov.downTan ) * pyscale * 0.5;
-			return { scale: [ pxscale, pyscale ], offset: [ pxoffset, pyoffset ] };
-
+			var pxscale = 2.0 / (fov.leftTan + fov.rightTan);
+			var pxoffset = (fov.leftTan - fov.rightTan) * pxscale * 0.5;
+			var pyscale = 2.0 / (fov.upTan + fov.downTan);
+			var pyoffset = (fov.upTan - fov.downTan) * pyscale * 0.5;
+			return { scale: [pxscale, pyscale], offset: [pxoffset, pyoffset] };
 		}
 
-		function fovPortToProjection( fov, rightHanded, zNear, zFar ) {
+		function fovPortToProjection(fov, rightHanded, zNear, zFar) {
 
 			rightHanded = rightHanded === undefined ? true : rightHanded;
 			zNear = zNear === undefined ? 0.01 : zNear;
 			zFar = zFar === undefined ? 10000.0 : zFar;
 
-			var handednessScale = rightHanded ? - 1.0 : 1.0;
+			var handednessScale = rightHanded ? -1.0 : 1.0;
 
 			// start with an identity matrix
 			var mobj = new THREE.Matrix4();
 			var m = mobj.elements;
 
 			// and with scale/offset info for normalized device coords
-			var scaleAndOffset = fovToNDCScaleOffset( fov );
+			var scaleAndOffset = fovToNDCScaleOffset(fov);
 
 			// X result, map clip edges to [-w,+w]
-			m[ 0 * 4 + 0 ] = scaleAndOffset.scale[ 0 ];
-			m[ 0 * 4 + 1 ] = 0.0;
-			m[ 0 * 4 + 2 ] = scaleAndOffset.offset[ 0 ] * handednessScale;
-			m[ 0 * 4 + 3 ] = 0.0;
+			m[0 * 4 + 0] = scaleAndOffset.scale[0];
+			m[0 * 4 + 1] = 0.0;
+			m[0 * 4 + 2] = scaleAndOffset.offset[0] * handednessScale;
+			m[0 * 4 + 3] = 0.0;
 
 			// Y result, map clip edges to [-w,+w]
 			// Y offset is negated because this proj matrix transforms from world coords with Y=up,
 			// but the NDC scaling has Y=down (thanks D3D?)
-			m[ 1 * 4 + 0 ] = 0.0;
-			m[ 1 * 4 + 1 ] = scaleAndOffset.scale[ 1 ];
-			m[ 1 * 4 + 2 ] = - scaleAndOffset.offset[ 1 ] * handednessScale;
-			m[ 1 * 4 + 3 ] = 0.0;
+			m[1 * 4 + 0] = 0.0;
+			m[1 * 4 + 1] = scaleAndOffset.scale[1];
+			m[1 * 4 + 2] = -scaleAndOffset.offset[1] * handednessScale;
+			m[1 * 4 + 3] = 0.0;
 
 			// Z result (up to the app)
-			m[ 2 * 4 + 0 ] = 0.0;
-			m[ 2 * 4 + 1 ] = 0.0;
-			m[ 2 * 4 + 2 ] = zFar / ( zNear - zFar ) * - handednessScale;
-			m[ 2 * 4 + 3 ] = ( zFar * zNear ) / ( zNear - zFar );
+			m[2 * 4 + 0] = 0.0;
+			m[2 * 4 + 1] = 0.0;
+			m[2 * 4 + 2] = zFar / (zNear - zFar) * -handednessScale;
+			m[2 * 4 + 3] = zFar * zNear / (zNear - zFar);
 
 			// W result (= Z in)
-			m[ 3 * 4 + 0 ] = 0.0;
-			m[ 3 * 4 + 1 ] = 0.0;
-			m[ 3 * 4 + 2 ] = handednessScale;
-			m[ 3 * 4 + 3 ] = 0.0;
+			m[3 * 4 + 0] = 0.0;
+			m[3 * 4 + 1] = 0.0;
+			m[3 * 4 + 2] = handednessScale;
+			m[3 * 4 + 3] = 0.0;
 
 			mobj.transpose();
 
 			return mobj;
-
 		}
 
-		function fovToProjection( fov, rightHanded, zNear, zFar ) {
+		function fovToProjection(fov, rightHanded, zNear, zFar) {
 
 			var DEG2RAD = Math.PI / 180.0;
 
 			var fovPort = {
-				upTan: Math.tan( fov.upDegrees * DEG2RAD ),
-				downTan: Math.tan( fov.downDegrees * DEG2RAD ),
-				leftTan: Math.tan( fov.leftDegrees * DEG2RAD ),
-				rightTan: Math.tan( fov.rightDegrees * DEG2RAD )
+				upTan: Math.tan(fov.upDegrees * DEG2RAD),
+				downTan: Math.tan(fov.downDegrees * DEG2RAD),
+				leftTan: Math.tan(fov.leftDegrees * DEG2RAD),
+				rightTan: Math.tan(fov.rightDegrees * DEG2RAD)
 			};
 
-			return fovPortToProjection( fovPort, rightHanded, zNear, zFar );
-
+			return fovPortToProjection(fovPort, rightHanded, zNear, zFar);
 		}
-
 	};
-}
+};
+
 },{}],7:[function(require,module,exports){
+'use strict';
+
 /**
  * @author mrdoob / http://mrdoob.com
  * Based on @tojiro's vr-samples-utils.js
@@ -2048,103 +1866,93 @@ module.exports = function( THREE ){
 
 module.exports = {
 
-	isLatestAvailable: function () {
+		isLatestAvailable: function isLatestAvailable() {
 
-		return navigator.getVRDisplays !== undefined;
+				return navigator.getVRDisplays !== undefined;
+		},
 
-	},
+		isAvailable: function isAvailable() {
 
-	isAvailable: function () {
+				return navigator.getVRDisplays !== undefined || navigator.getVRDevices !== undefined;
+		},
 
-		return navigator.getVRDisplays !== undefined || navigator.getVRDevices !== undefined;
+		getMessage: function getMessage() {
 
-	},
+				var message;
 
-	getMessage: function () {
+				if (navigator.getVRDisplays) {
 
-		var message;
+						navigator.getVRDisplays().then(function (displays) {
 
-		if ( navigator.getVRDisplays ) {
+								if (displays.length === 0) message = 'WebVR supported, but no VRDisplays found.';
+						});
+				} else if (navigator.getVRDevices) {
 
-			navigator.getVRDisplays().then( function ( displays ) {
+						message = 'Your browser supports WebVR but not the latest version. See <a href="http://webvr.info">webvr.info</a> for more info.';
+				} else {
 
-				if ( displays.length === 0 ) message = 'WebVR supported, but no VRDisplays found.';
+						message = 'Your browser does not support WebVR. See <a href="http://webvr.info">webvr.info</a> for assistance.';
+				}
 
-			} );
+				if (message !== undefined) {
 
-		} else if ( navigator.getVRDevices ) {
+						var container = document.createElement('div');
+						container.style.position = 'absolute';
+						container.style.left = '0';
+						container.style.top = '0';
+						container.style.right = '0';
+						container.style.zIndex = '999';
+						container.align = 'center';
 
-			message = 'Your browser supports WebVR but not the latest version. See <a href="http://webvr.info">webvr.info</a> for more info.';
+						var error = document.createElement('div');
+						error.style.fontFamily = 'sans-serif';
+						error.style.fontSize = '16px';
+						error.style.fontStyle = 'normal';
+						error.style.lineHeight = '26px';
+						error.style.backgroundColor = '#fff';
+						error.style.color = '#000';
+						error.style.padding = '10px 20px';
+						error.style.margin = '50px';
+						error.style.display = 'inline-block';
+						error.innerHTML = message;
+						container.appendChild(error);
 
-		} else {
+						return container;
+				}
+		},
 
-			message = 'Your browser does not support WebVR. See <a href="http://webvr.info">webvr.info</a> for assistance.';
+		getButton: function getButton(effect) {
 
+				var button = document.createElement('button');
+				button.style.position = 'absolute';
+				button.style.left = 'calc(50% - 50px)';
+				button.style.bottom = '20px';
+				button.style.width = '100px';
+				button.style.border = '0';
+				button.style.padding = '8px';
+				button.style.cursor = 'pointer';
+				button.style.backgroundColor = '#000';
+				button.style.color = '#fff';
+				button.style.fontFamily = 'sans-serif';
+				button.style.fontSize = '13px';
+				button.style.fontStyle = 'normal';
+				button.style.textAlign = 'center';
+				button.style.zIndex = '999';
+				button.textContent = 'ENTER VR';
+				button.onclick = function () {
+
+						effect.isPresenting ? effect.exitPresent() : effect.requestPresent();
+				};
+
+				window.addEventListener('vrdisplaypresentchange', function (event) {
+
+						button.textContent = effect.isPresenting ? 'EXIT VR' : 'ENTER VR';
+				}, false);
+
+				return button;
 		}
-
-		if ( message !== undefined ) {
-
-			var container = document.createElement( 'div' );
-			container.style.position = 'absolute';
-			container.style.left = '0';
-			container.style.top = '0';
-			container.style.right = '0';
-			container.style.zIndex = '999';
-			container.align = 'center';
-
-			var error = document.createElement( 'div' );
-			error.style.fontFamily = 'sans-serif';
-			error.style.fontSize = '16px';
-			error.style.fontStyle = 'normal';
-			error.style.lineHeight = '26px';
-			error.style.backgroundColor = '#fff';
-			error.style.color = '#000';
-			error.style.padding = '10px 20px';
-			error.style.margin = '50px';
-			error.style.display = 'inline-block';
-			error.innerHTML = message;
-			container.appendChild( error );
-
-			return container;
-
-		}
-
-	},
-
-	getButton: function ( effect ) {
-
-		var button = document.createElement( 'button' );
-		button.style.position = 'absolute';
-		button.style.left = 'calc(50% - 50px)';
-		button.style.bottom = '20px';
-		button.style.width = '100px';
-		button.style.border = '0';
-		button.style.padding = '8px';
-		button.style.cursor = 'pointer';
-		button.style.backgroundColor = '#000';
-		button.style.color = '#fff';
-		button.style.fontFamily = 'sans-serif';
-		button.style.fontSize = '13px';
-		button.style.fontStyle = 'normal';
-		button.style.textAlign = 'center';
-		button.style.zIndex = '999';
-		button.textContent = 'ENTER VR';
-		button.onclick = function() {
-
-			effect.isPresenting ? effect.exitPresent() : effect.requestPresent();
-
-		};
-
-		window.addEventListener( 'vrdisplaypresentchange', function ( event ) {
-
-			button.textContent = effect.isPresenting ? 'EXIT VR' : 'ENTER VR';
-
-		}, false );
-
-		return button;
-
-	}
 
 };
+
 },{}]},{},[1])(1)
 });
