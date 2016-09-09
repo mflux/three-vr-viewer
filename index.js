@@ -3,16 +3,10 @@
  * Based on @mattdesl three-orbit-viewer
  */
 
-import Emitter from 'events';
+const Emitter = require( 'events' );
+const WEBVR = require( './thirdparty/webvr' );
 
-import WEBVR from './thirdparty/webvr';
-
-import * as VREffect from './thirdparty/vreffect';
-import * as VRControls from './thirdparty/vrcontrols';
-import * as ViveController from './thirdparty/vivecontroller';
-import * as OBJLoader from './thirdparty/objloader';
-
-export default function create( {
+module.exports = function create( {
 
   emptyRoom               = true,
   standing                = true,
@@ -24,9 +18,14 @@ export default function create( {
   pathToControllers       = 'models/obj/vive-controller/',
   controllerModelName     = 'vr_controller_vive_1_5.obj',
   controllerTextureMap    = 'onepointfive_texture.png',
-  controllerSpecMap       = 'onepointfive_spec.png'
-
+  controllerSpecMap       = 'onepointfive_spec.png',
+  THREE
 } = {} ){
+
+const VREffect = require( './thirdparty/vreffect' )( THREE );
+const VRControls = require( './thirdparty/vrcontrols' )( THREE );
+const ViveController = require( './thirdparty/vivecontroller' )( THREE );
+const OBJLoader = require( './thirdparty/objloader' )( THREE );
 
   if ( WEBVR.isLatestAvailable() === false ) {
     document.body.appendChild( WEBVR.getMessage() );
@@ -156,5 +155,5 @@ export default function create( {
 
 
 if( window ){
-  window.VRViewer = create;
+  window.VRViewer = module.exports;
 }

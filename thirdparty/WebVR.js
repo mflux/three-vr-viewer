@@ -3,7 +3,7 @@
  * Based on @tojiro's vr-samples-utils.js
  */
 
-export default {
+module.exports = {
 
 	isLatestAvailable: function () {
 

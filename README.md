@@ -15,15 +15,17 @@ Include the script from build/three-vr-viewer.js in your project, after THREE.js
 
 In your own project:
 
-    VRViewer();
+    VRViewer({THREE});
 
 That's literally it.
+
+Please note you have to pass in an existing THREE.js.
 
 ## Exposing THREE.js objects ##
 
 **VRViewer()** returns several objects. You can destructure this object like so:
 
-    const { scene, camera, renderer, events, toggleVR, controllers } = VRViewer();
+    const { scene, camera, renderer, events, toggleVR, controllers } = VRViewer({THREE});
 
 Now you have access to the scene, camera, etc.
 
@@ -57,6 +59,7 @@ You're also given the VR controllers, if present, as an array of **controllers[]
 For example:
 
     VRViewer({
+      THREE,
       autoEnter: true,
       emptyRoom: true
     });
@@ -74,6 +77,6 @@ This automatically enters VR and enables the empty room.
 
 
 ## Notes ##
-* This module assumes the existence of THREE.js in global scope somewhere. Meaning you should have included it with <script> tag before including three-vr-viewer.js.
+* The module requires that you pass in a copy of THREE.js. Meaning you should have included it with <script> tag.
 * You can also include this as an ES6 module directly by doing
     import create from 'VRViewer' if you're installing it from NPM.
