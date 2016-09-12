@@ -25,7 +25,7 @@ Please note you have to pass in an existing THREE.js.
 
 **VRViewer()** returns several objects. You can destructure this object like so:
 
-    const { scene, camera, renderer, events, toggleVR, controllers } = VRViewer({THREE});
+    const { scene, camera, renderer, events, toggleVR, controllers, vrEffect } = VRViewer({THREE});
 
 Now you have access to the scene, camera, etc.
 

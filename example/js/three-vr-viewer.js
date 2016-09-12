@@ -155,7 +155,7 @@ module.exports = function create() {
   animate();
 
   return {
-    scene: scene, camera: camera, controls: controls, renderer: renderer,
+    scene: scene, camera: camera, controls: controls, renderer: renderer, vrEffect: effect,
     controllers: [controller1, controller2],
     events: events,
     toggleVR: toggleVR

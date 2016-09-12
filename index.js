@@ -146,7 +146,7 @@ const OBJLoader = require( './thirdparty/objloader' )( THREE );
   animate();
 
   return {
-    scene, camera, controls, renderer,
+    scene, camera, controls, renderer, vrEffect: effect,
     controllers: [ controller1, controller2 ],
     events,
     toggleVR
