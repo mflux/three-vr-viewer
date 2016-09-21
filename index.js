@@ -100,9 +100,17 @@ const OBJLoader = require( './thirdparty/objloader' )( THREE );
       document.body.appendChild( WEBVR.getButton( effect ) );
     }
 
+    /*
+
+    Sigh.
+
+    Some day, when the world is a more trustworthy place, you can be back.
+
     if( autoEnter ){
       setTimeout( ()=>effect.requestPresent(), 1000 );
     }
+
+    */
   }
 
   window.addEventListener( 'resize', function(){

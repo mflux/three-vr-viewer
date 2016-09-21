@@ -110,9 +110,25 @@ module.exports = function create() {
     }
 
     if (autoEnter) {
-      setTimeout(function () {
-        return effect.requestPresent();
-      }, 1000);
+      (function () {
+        var eventFire = function eventFire(el, etype) {
+          if (el.fireEvent) {
+            el.fireEvent('on' + etype);
+          } else {
+            var evObj = document.createEvent('Events');
+            evObj.initEvent(etype, true, false);
+            el.dispatchEvent(evObj);
+          }
+        };
+
+        window.addEventListener('click', function () {
+          effect.requestPresent();
+        });
+
+        setTimeout(function () {
+          eventFire(window, 'click');
+        }, 1000);
+      })();
     }
   }
 

@@ -44,7 +44,6 @@ You're also given the VR controllers, if present, as an array of **controllers[]
 ## Options ##
 **VRViewer()** can take several options:
 
-- **autoEnter:** (default false). Automatically enter VR without having to push the button, after 1 second. Extremely useful for VR development.
 - **antiAlias:** (default true). Anti-aliasing. This reduces performance if on.
 - **clearColor:** (default 0x505050). Hexadecimal for background color.
 - **emptyRoom:** (default true). Creates an empty room so you're not floating in space.
@@ -60,7 +59,6 @@ For example:
 
     VRViewer({
       THREE,
-      autoEnter: true,
       emptyRoom: true
     });
 
