@@ -61,7 +61,7 @@ module.exports = function( THREE ){
 
       gamepad = findGamepad( id );
 
-      if ( gamepad !== undefined && gamepad.pose !== null ) {
+      if ( gamepad !== undefined && gamepad.pose !== undefined ) {
 
         //  Position and orientation.
 

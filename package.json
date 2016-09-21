@@ -2,7 +2,7 @@
   "name": "three-vr-viewer",
   "author": "mflux",
   "license": "MIT",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "description": "One-liner to start THREE.js WebVR projects.",
   "main": "three-vr-viewer.js",
   "scripts": {
