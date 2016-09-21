@@ -12,7 +12,6 @@ module.exports = function create( {
   standing                = true,
   loadControllers         = true,
   vrButton                = true,
-  autoEnter               = false,
   antiAlias               = true,
   clearColor              = 0x505050,
   pathToControllers       = 'models/obj/vive-controller/',

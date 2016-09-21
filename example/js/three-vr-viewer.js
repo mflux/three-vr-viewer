@@ -20,8 +20,6 @@ module.exports = function create() {
   var loadControllers = _ref$loadControllers === undefined ? true : _ref$loadControllers;
   var _ref$vrButton = _ref.vrButton;
   var vrButton = _ref$vrButton === undefined ? true : _ref$vrButton;
-  var _ref$autoEnter = _ref.autoEnter;
-  var autoEnter = _ref$autoEnter === undefined ? false : _ref$autoEnter;
   var _ref$antiAlias = _ref.antiAlias;
   var antiAlias = _ref$antiAlias === undefined ? true : _ref$antiAlias;
   var _ref$clearColor = _ref.clearColor;
@@ -109,27 +107,13 @@ module.exports = function create() {
       document.body.appendChild(WEBVR.getButton(effect));
     }
 
-    if (autoEnter) {
-      (function () {
-        var eventFire = function eventFire(el, etype) {
-          if (el.fireEvent) {
-            el.fireEvent('on' + etype);
-          } else {
-            var evObj = document.createEvent('Events');
-            evObj.initEvent(etype, true, false);
-            el.dispatchEvent(evObj);
-          }
-        };
-
-        window.addEventListener('click', function () {
-          effect.requestPresent();
-        });
-
-        setTimeout(function () {
-          eventFire(window, 'click');
-        }, 1000);
-      })();
+    /*
+      Sigh.
+      Some day, when the world is a more trustworthy place, you can be back.
+      if( autoEnter ){
+      setTimeout( ()=>effect.requestPresent(), 1000 );
     }
+      */
   }
 
   window.addEventListener('resize', function () {
@@ -1252,20 +1236,19 @@ module.exports = function (THREE) {
 
 		var standingMatrix = new THREE.Matrix4();
 
+		var frameData = null;
+		if ('VRFrameData' in window) {
+			frameData = new VRFrameData();
+		}
+
 		function gotVRDisplays(displays) {
 
 			vrDisplays = displays;
 
-			for (var i = 0; i < displays.length; i++) {
+			if (displays.length > 0) {
 
-				if ('VRDisplay' in window && displays[i] instanceof VRDisplay || 'PositionSensorVRDevice' in window && displays[i] instanceof PositionSensorVRDevice) {
-
-					vrDisplay = displays[i];
-					break; // We keep the first we encounter
-				}
-			}
-
-			if (vrDisplay === undefined) {
+				vrDisplay = displays[0];
+			} else {
 
 				if (onError) onError('VR input not available.');
 			}
@@ -1274,10 +1257,6 @@ module.exports = function (THREE) {
 		if (navigator.getVRDisplays) {
 
 			navigator.getVRDisplays().then(gotVRDisplays);
-		} else if (navigator.getVRDevices) {
-
-			// Deprecated API.
-			navigator.getVRDevices().then(gotVRDisplays);
 		}
 
 		// the Rift SDK returns the position in meters
@@ -1313,39 +1292,28 @@ module.exports = function (THREE) {
 
 			if (vrDisplay) {
 
-				if (vrDisplay.getPose) {
+				var pose;
 
-					var pose = vrDisplay.getPose();
+				if (vrDisplay.getFrameData) {
 
-					if (pose.orientation !== null) {
+					vrDisplay.getFrameData(frameData);
+					pose = frameData.pose;
+				} else if (vrDisplay.getPose) {
 
-						object.quaternion.fromArray(pose.orientation);
-					}
+					pose = vrDisplay.getPose();
+				}
 
-					if (pose.position !== null) {
+				if (pose.orientation !== null) {
 
-						object.position.fromArray(pose.position);
-					} else {
+					object.quaternion.fromArray(pose.orientation);
+				}
 
-						object.position.set(0, 0, 0);
-					}
+				if (pose.position !== null) {
+
+					object.position.fromArray(pose.position);
 				} else {
 
-					// Deprecated API.
-					var state = vrDisplay.getState();
-
-					if (state.orientation !== null) {
-
-						object.quaternion.copy(state.orientation);
-					}
-
-					if (state.position !== null) {
-
-						object.position.copy(state.position);
-					} else {
-
-						object.position.set(0, 0, 0);
-					}
+					object.position.set(0, 0, 0);
 				}
 
 				if (this.standing) {
@@ -1370,18 +1338,7 @@ module.exports = function (THREE) {
 
 			if (vrDisplay) {
 
-				if (vrDisplay.resetPose !== undefined) {
-
-					vrDisplay.resetPose();
-				} else if (vrDisplay.resetSensor !== undefined) {
-
-					// Deprecated API.
-					vrDisplay.resetSensor();
-				} else if (vrDisplay.zeroSensor !== undefined) {
-
-					// Really deprecated API.
-					vrDisplay.zeroSensor();
-				}
+				vrDisplay.resetPose();
 			}
 		};
 
@@ -1421,34 +1378,25 @@ module.exports = function (THREE) {
 module.exports = function (THREE) {
 	THREE.VREffect = function (renderer, onError) {
 
-		var isWebVR1 = true;
-
 		var vrDisplay, vrDisplays;
 		var eyeTranslationL = new THREE.Vector3();
 		var eyeTranslationR = new THREE.Vector3();
 		var renderRectL, renderRectR;
-		var eyeFOVL, eyeFOVR;
+
+		var frameData = null;
+		if ('VRFrameData' in window) {
+
+			frameData = new VRFrameData();
+		}
 
 		function gotVRDisplays(displays) {
 
 			vrDisplays = displays;
 
-			for (var i = 0; i < displays.length; i++) {
+			if (displays.length > 0) {
 
-				if ('VRDisplay' in window && displays[i] instanceof VRDisplay) {
-
-					vrDisplay = displays[i];
-					isWebVR1 = true;
-					break; // We keep the first we encounter
-				} else if ('HMDVRDevice' in window && displays[i] instanceof HMDVRDevice) {
-
-					vrDisplay = displays[i];
-					isWebVR1 = false;
-					break; // We keep the first we encounter
-				}
-			}
-
-			if (vrDisplay === undefined) {
+				vrDisplay = displays[0];
+			} else {
 
 				if (onError) onError('HMD not available');
 			}
@@ -1457,10 +1405,6 @@ module.exports = function (THREE) {
 		if (navigator.getVRDisplays) {
 
 			navigator.getVRDisplays().then(gotVRDisplays);
-		} else if (navigator.getVRDevices) {
-
-			// Deprecated API.
-			navigator.getVRDevices().then(gotVRDisplays);
 		}
 
 		//
@@ -1471,6 +1415,7 @@ module.exports = function (THREE) {
 		var scope = this;
 
 		var rendererSize = renderer.getSize();
+		var rendererUpdateStyle = false;
 		var rendererPixelRatio = renderer.getPixelRatio();
 
 		this.getVRDisplay = function () {
@@ -1483,26 +1428,20 @@ module.exports = function (THREE) {
 			return vrDisplays;
 		};
 
-		this.setSize = function (width, height) {
+		this.setSize = function (width, height, updateStyle) {
 
 			rendererSize = { width: width, height: height };
+			rendererUpdateStyle = updateStyle;
 
 			if (scope.isPresenting) {
 
 				var eyeParamsL = vrDisplay.getEyeParameters('left');
 				renderer.setPixelRatio(1);
-
-				if (isWebVR1) {
-
-					renderer.setSize(eyeParamsL.renderWidth * 2, eyeParamsL.renderHeight, false);
-				} else {
-
-					renderer.setSize(eyeParamsL.renderRect.width * 2, eyeParamsL.renderRect.height, false);
-				}
+				renderer.setSize(eyeParamsL.renderWidth * 2, eyeParamsL.renderHeight, false);
 			} else {
 
 				renderer.setPixelRatio(rendererPixelRatio);
-				renderer.setSize(width, height);
+				renderer.setSize(width, height, updateStyle);
 			}
 		};
 
@@ -1518,31 +1457,19 @@ module.exports = function (THREE) {
 		function onFullscreenChange() {
 
 			var wasPresenting = scope.isPresenting;
-			scope.isPresenting = vrDisplay !== undefined && (vrDisplay.isPresenting || !isWebVR1 && document[fullscreenElement] instanceof window.HTMLElement);
+			scope.isPresenting = vrDisplay !== undefined && vrDisplay.isPresenting;
 
 			if (scope.isPresenting) {
 
 				var eyeParamsL = vrDisplay.getEyeParameters('left');
-				var eyeWidth, eyeHeight;
+				var eyeWidth = eyeParamsL.renderWidth;
+				var eyeHeight = eyeParamsL.renderHeight;
 
-				if (isWebVR1) {
+				var layers = vrDisplay.getLayers();
+				if (layers.length) {
 
-					eyeWidth = eyeParamsL.renderWidth;
-					eyeHeight = eyeParamsL.renderHeight;
-
-					if (vrDisplay.getLayers) {
-
-						var layers = vrDisplay.getLayers();
-						if (layers.length) {
-
-							leftBounds = layers[0].leftBounds || [0.0, 0.0, 0.5, 1.0];
-							rightBounds = layers[0].rightBounds || [0.5, 0.0, 0.5, 1.0];
-						}
-					}
-				} else {
-
-					eyeWidth = eyeParamsL.renderRect.width;
-					eyeHeight = eyeParamsL.renderRect.height;
+					leftBounds = layers[0].leftBounds || [0.0, 0.0, 0.5, 1.0];
+					rightBounds = layers[0].rightBounds || [0.5, 0.0, 0.5, 1.0];
 				}
 
 				if (!wasPresenting) {
@@ -1556,28 +1483,8 @@ module.exports = function (THREE) {
 			} else if (wasPresenting) {
 
 				renderer.setPixelRatio(rendererPixelRatio);
-				renderer.setSize(rendererSize.width, rendererSize.height);
+				renderer.setSize(rendererSize.width, rendererSize.height, rendererUpdateStyle);
 			}
-		}
-
-		if (canvas.requestFullscreen) {
-
-			requestFullscreen = 'requestFullscreen';
-			fullscreenElement = 'fullscreenElement';
-			exitFullscreen = 'exitFullscreen';
-			document.addEventListener('fullscreenchange', onFullscreenChange, false);
-		} else if (canvas.mozRequestFullScreen) {
-
-			requestFullscreen = 'mozRequestFullScreen';
-			fullscreenElement = 'mozFullScreenElement';
-			exitFullscreen = 'mozCancelFullScreen';
-			document.addEventListener('mozfullscreenchange', onFullscreenChange, false);
-		} else {
-
-			requestFullscreen = 'webkitRequestFullscreen';
-			fullscreenElement = 'webkitFullscreenElement';
-			exitFullscreen = 'webkitExitFullscreen';
-			document.addEventListener('webkitfullscreenchange', onFullscreenChange, false);
 		}
 
 		window.addEventListener('vrdisplaypresentchange', onFullscreenChange, false);
@@ -1598,26 +1505,12 @@ module.exports = function (THREE) {
 					return;
 				}
 
-				if (isWebVR1) {
+				if (boolean) {
 
-					if (boolean) {
-
-						resolve(vrDisplay.requestPresent([{ source: canvas }]));
-					} else {
-
-						resolve(vrDisplay.exitPresent());
-					}
+					resolve(vrDisplay.requestPresent([{ source: canvas }]));
 				} else {
 
-					if (canvas[requestFullscreen]) {
-
-						canvas[boolean ? requestFullscreen : exitFullscreen]({ vrDisplay: vrDisplay });
-						resolve();
-					} else {
-
-						console.error('No compatible requestFullscreen method found.');
-						reject(new Error('No compatible requestFullscreen method found.'));
-					}
+					resolve(vrDisplay.exitPresent());
 				}
 			});
 		};
@@ -1634,7 +1527,7 @@ module.exports = function (THREE) {
 
 		this.requestAnimationFrame = function (f) {
 
-			if (isWebVR1 && vrDisplay !== undefined) {
+			if (vrDisplay !== undefined) {
 
 				return vrDisplay.requestAnimationFrame(f);
 			} else {
@@ -1645,7 +1538,7 @@ module.exports = function (THREE) {
 
 		this.cancelAnimationFrame = function (h) {
 
-			if (isWebVR1 && vrDisplay !== undefined) {
+			if (vrDisplay !== undefined) {
 
 				vrDisplay.cancelAnimationFrame(h);
 			} else {
@@ -1656,7 +1549,7 @@ module.exports = function (THREE) {
 
 		this.submitFrame = function () {
 
-			if (isWebVR1 && vrDisplay !== undefined && scope.isPresenting) {
+			if (vrDisplay !== undefined && scope.isPresenting) {
 
 				vrDisplay.submitFrame();
 			}
@@ -1687,19 +1580,8 @@ module.exports = function (THREE) {
 				var eyeParamsL = vrDisplay.getEyeParameters('left');
 				var eyeParamsR = vrDisplay.getEyeParameters('right');
 
-				if (isWebVR1) {
-
-					eyeTranslationL.fromArray(eyeParamsL.offset);
-					eyeTranslationR.fromArray(eyeParamsR.offset);
-					eyeFOVL = eyeParamsL.fieldOfView;
-					eyeFOVR = eyeParamsR.fieldOfView;
-				} else {
-
-					eyeTranslationL.copy(eyeParamsL.eyeTranslation);
-					eyeTranslationR.copy(eyeParamsR.eyeTranslation);
-					eyeFOVL = eyeParamsL.recommendedFieldOfView;
-					eyeFOVR = eyeParamsR.recommendedFieldOfView;
-				}
+				eyeTranslationL.fromArray(eyeParamsL.offset);
+				eyeTranslationR.fromArray(eyeParamsR.offset);
 
 				if (Array.isArray(scene)) {
 
@@ -1729,6 +1611,7 @@ module.exports = function (THREE) {
 					renderTarget.scissorTest = true;
 				} else {
 
+					renderer.setRenderTarget(null);
 					renderer.setScissorTest(true);
 				}
 
@@ -1736,15 +1619,27 @@ module.exports = function (THREE) {
 
 				if (camera.parent === null) camera.updateMatrixWorld();
 
-				cameraL.projectionMatrix = fovToProjection(eyeFOVL, true, camera.near, camera.far);
-				cameraR.projectionMatrix = fovToProjection(eyeFOVR, true, camera.near, camera.far);
-
 				camera.matrixWorld.decompose(cameraL.position, cameraL.quaternion, cameraL.scale);
 				camera.matrixWorld.decompose(cameraR.position, cameraR.quaternion, cameraR.scale);
 
 				var scale = this.scale;
 				cameraL.translateOnAxis(eyeTranslationL, scale);
 				cameraR.translateOnAxis(eyeTranslationR, scale);
+
+				if (vrDisplay.getFrameData) {
+
+					vrDisplay.depthNear = camera.near;
+					vrDisplay.depthFar = camera.far;
+
+					vrDisplay.getFrameData(frameData);
+
+					cameraL.projectionMatrix.elements = frameData.leftProjectionMatrix;
+					cameraR.projectionMatrix.elements = frameData.rightProjectionMatrix;
+				} else {
+
+					cameraL.projectionMatrix = fovToProjection(eyeParamsL.fieldOfView, true, camera.near, camera.far);
+					cameraR.projectionMatrix = fovToProjection(eyeParamsR.fieldOfView, true, camera.near, camera.far);
+				}
 
 				// render left eye
 				if (renderTarget) {
