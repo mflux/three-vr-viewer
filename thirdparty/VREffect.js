@@ -10,6 +10,7 @@
  */
 
 module.exports = function( THREE ){
+
 	THREE.VREffect = function ( renderer, onError ) {
 
 		var vrDisplay, vrDisplays;
@@ -112,8 +113,10 @@ module.exports = function( THREE ){
 				var layers = vrDisplay.getLayers();
 				if ( layers.length ) {
 
-					leftBounds = layers[0].leftBounds || [ 0.0, 0.0, 0.5, 1.0 ];
-					rightBounds = layers[0].rightBounds || [ 0.5, 0.0, 0.5, 1.0 ];
+					var layer = layers[0];
+
+					leftBounds = layer.leftBounds !== null && layer.leftBounds.length === 4 ? layer.leftBounds : [ 0.0, 0.0, 0.5, 1.0 ];
+					rightBounds = layer.rightBounds !== null && layer.rightBounds.length === 4 ? layer.rightBounds : [ 0.5, 0.0, 0.5, 1.0 ];
 
 				}
 
@@ -350,6 +353,7 @@ module.exports = function( THREE ){
 
 				} else {
 
+					renderer.setViewport( 0, 0, size.width, size.height );
 					renderer.setScissorTest( false );
 
 				}

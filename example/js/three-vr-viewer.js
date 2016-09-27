@@ -1110,113 +1110,113 @@ module.exports = function (THREE) {
  * @author stewdio / http://stewd.io
  */
 module.exports = function (THREE) {
-  THREE.ViveController = function (id) {
+        THREE.ViveController = function (id) {
 
-    THREE.Object3D.call(this);
+                THREE.Object3D.call(this);
 
-    var scope = this;
-    var gamepad;
+                var scope = this;
+                var gamepad;
 
-    var axes = [0, 0];
-    var thumbpadIsPressed = false;
-    var triggerIsPressed = false;
-    var gripsArePressed = false;
-    var menuIsPressed = false;
+                var axes = [0, 0];
+                var thumbpadIsPressed = false;
+                var triggerIsPressed = false;
+                var gripsArePressed = false;
+                var menuIsPressed = false;
 
-    function findGamepad(id) {
+                function findGamepad(id) {
 
-      // Iterate across gamepads as Vive Controllers may not be
-      // in position 0 and 1.
+                        // Iterate across gamepads as Vive Controllers may not be
+                        // in position 0 and 1.
 
-      var gamepads = navigator.getGamepads();
+                        var gamepads = navigator.getGamepads();
 
-      for (var i = 0, j = 0; i < 4; i++) {
+                        for (var i = 0, j = 0; i < 4; i++) {
 
-        var gamepad = gamepads[i];
+                                var gamepad = gamepads[i];
 
-        if (gamepad && gamepad.id === 'OpenVR Gamepad') {
+                                if (gamepad && gamepad.id === 'OpenVR Gamepad') {
 
-          if (j === id) return gamepad;
+                                        if (j === id) return gamepad;
 
-          j++;
-        }
-      }
-    }
+                                        j++;
+                                }
+                        }
+                }
 
-    this.matrixAutoUpdate = false;
-    this.standingMatrix = new THREE.Matrix4();
+                this.matrixAutoUpdate = false;
+                this.standingMatrix = new THREE.Matrix4();
 
-    this.getGamepad = function () {
+                this.getGamepad = function () {
 
-      return gamepad;
-    };
+                        return gamepad;
+                };
 
-    this.getButtonState = function (button) {
+                this.getButtonState = function (button) {
 
-      if (button === 'thumbpad') return thumbpadIsPressed;
-      if (button === 'trigger') return triggerIsPressed;
-      if (button === 'grips') return gripsArePressed;
-      if (button === 'menu') return menuIsPressed;
-    };
+                        if (button === 'thumbpad') return thumbpadIsPressed;
+                        if (button === 'trigger') return triggerIsPressed;
+                        if (button === 'grips') return gripsArePressed;
+                        if (button === 'menu') return menuIsPressed;
+                };
 
-    this.update = function () {
+                this.update = function () {
 
-      gamepad = findGamepad(id);
+                        gamepad = findGamepad(id);
 
-      if (gamepad !== undefined && gamepad.pose !== undefined) {
+                        if (gamepad !== undefined && gamepad.pose !== undefined) {
 
-        //  Position and orientation.
+                                //  Position and orientation.
 
-        var pose = gamepad.pose;
+                                var pose = gamepad.pose;
 
-        if (pose.position !== null) scope.position.fromArray(pose.position);
-        if (pose.orientation !== null) scope.quaternion.fromArray(pose.orientation);
-        scope.matrix.compose(scope.position, scope.quaternion, scope.scale);
-        scope.matrix.multiplyMatrices(scope.standingMatrix, scope.matrix);
-        scope.matrixWorldNeedsUpdate = true;
-        scope.visible = true;
+                                if (pose.position !== null) scope.position.fromArray(pose.position);
+                                if (pose.orientation !== null) scope.quaternion.fromArray(pose.orientation);
+                                scope.matrix.compose(scope.position, scope.quaternion, scope.scale);
+                                scope.matrix.multiplyMatrices(scope.standingMatrix, scope.matrix);
+                                scope.matrixWorldNeedsUpdate = true;
+                                scope.visible = true;
 
-        //  Thumbpad and Buttons.
+                                //  Thumbpad and Buttons.
 
-        if (axes[0] !== gamepad.axes[0] || axes[1] !== gamepad.axes[1]) {
+                                if (axes[0] !== gamepad.axes[0] || axes[1] !== gamepad.axes[1]) {
 
-          axes[0] = gamepad.axes[0]; //  X axis: -1 = Left, +1 = Right.
-          axes[1] = gamepad.axes[1]; //  Y axis: -1 = Bottom, +1 = Top.
-          scope.dispatchEvent({ type: 'axischanged', axes: axes });
-        }
+                                        axes[0] = gamepad.axes[0]; //  X axis: -1 = Left, +1 = Right.
+                                        axes[1] = gamepad.axes[1]; //  Y axis: -1 = Bottom, +1 = Top.
+                                        scope.dispatchEvent({ type: 'axischanged', axes: axes });
+                                }
 
-        if (thumbpadIsPressed !== gamepad.buttons[0].pressed) {
+                                if (thumbpadIsPressed !== gamepad.buttons[0].pressed) {
 
-          thumbpadIsPressed = gamepad.buttons[0].pressed;
-          scope.dispatchEvent({ type: thumbpadIsPressed ? 'thumbpaddown' : 'thumbpadup' });
-        }
+                                        thumbpadIsPressed = gamepad.buttons[0].pressed;
+                                        scope.dispatchEvent({ type: thumbpadIsPressed ? 'thumbpaddown' : 'thumbpadup' });
+                                }
 
-        if (triggerIsPressed !== gamepad.buttons[1].pressed) {
+                                if (triggerIsPressed !== gamepad.buttons[1].pressed) {
 
-          triggerIsPressed = gamepad.buttons[1].pressed;
-          scope.dispatchEvent({ type: triggerIsPressed ? 'triggerdown' : 'triggerup' });
-        }
+                                        triggerIsPressed = gamepad.buttons[1].pressed;
+                                        scope.dispatchEvent({ type: triggerIsPressed ? 'triggerdown' : 'triggerup' });
+                                }
 
-        if (gripsArePressed !== gamepad.buttons[2].pressed) {
+                                if (gripsArePressed !== gamepad.buttons[2].pressed) {
 
-          gripsArePressed = gamepad.buttons[2].pressed;
-          scope.dispatchEvent({ type: gripsArePressed ? 'gripsdown' : 'gripsup' });
-        }
+                                        gripsArePressed = gamepad.buttons[2].pressed;
+                                        scope.dispatchEvent({ type: gripsArePressed ? 'gripsdown' : 'gripsup' });
+                                }
 
-        if (menuIsPressed !== gamepad.buttons[3].pressed) {
+                                if (menuIsPressed !== gamepad.buttons[3].pressed) {
 
-          menuIsPressed = gamepad.buttons[3].pressed;
-          scope.dispatchEvent({ type: menuIsPressed ? 'menudown' : 'menuup' });
-        }
-      } else {
+                                        menuIsPressed = gamepad.buttons[3].pressed;
+                                        scope.dispatchEvent({ type: menuIsPressed ? 'menudown' : 'menuup' });
+                                }
+                        } else {
 
-        scope.visible = false;
-      }
-    };
-  };
+                                scope.visible = false;
+                        }
+                };
+        };
 
-  THREE.ViveController.prototype = Object.create(THREE.Object3D.prototype);
-  THREE.ViveController.prototype.constructor = THREE.ViveController;
+        THREE.ViveController.prototype = Object.create(THREE.Object3D.prototype);
+        THREE.ViveController.prototype.constructor = THREE.ViveController;
 };
 
 },{}],5:[function(require,module,exports){
@@ -1376,6 +1376,7 @@ module.exports = function (THREE) {
  */
 
 module.exports = function (THREE) {
+
 	THREE.VREffect = function (renderer, onError) {
 
 		var vrDisplay, vrDisplays;
@@ -1468,8 +1469,10 @@ module.exports = function (THREE) {
 				var layers = vrDisplay.getLayers();
 				if (layers.length) {
 
-					leftBounds = layers[0].leftBounds || [0.0, 0.0, 0.5, 1.0];
-					rightBounds = layers[0].rightBounds || [0.5, 0.0, 0.5, 1.0];
+					var layer = layers[0];
+
+					leftBounds = layer.leftBounds !== null && layer.leftBounds.length === 4 ? layer.leftBounds : [0.0, 0.0, 0.5, 1.0];
+					rightBounds = layer.rightBounds !== null && layer.rightBounds.length === 4 ? layer.rightBounds : [0.5, 0.0, 0.5, 1.0];
 				}
 
 				if (!wasPresenting) {
@@ -1673,6 +1676,7 @@ module.exports = function (THREE) {
 					renderer.setRenderTarget(null);
 				} else {
 
+					renderer.setViewport(0, 0, size.width, size.height);
 					renderer.setScissorTest(false);
 				}
 
