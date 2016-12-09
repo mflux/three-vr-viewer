@@ -2,8 +2,8 @@
  * @author dmarcos / https://github.com/dmarcos
  * @author mrdoob / http://mrdoob.com
  */
-
 module.exports = function( THREE ){
+
 	THREE.VRControls = function ( object, onError ) {
 
 		var scope = this;
@@ -13,8 +13,11 @@ module.exports = function( THREE ){
 		var standingMatrix = new THREE.Matrix4();
 
 		var frameData = null;
+
 		if ( 'VRFrameData' in window ) {
+
 			frameData = new VRFrameData();
+
 		}
 
 		function gotVRDisplays( displays ) {
@@ -35,7 +38,11 @@ module.exports = function( THREE ){
 
 		if ( navigator.getVRDisplays ) {
 
-			navigator.getVRDisplays().then( gotVRDisplays );
+			navigator.getVRDisplays().then( gotVRDisplays ).catch ( function () {
+
+				console.warn( 'THREE.VRControls: Unable to get VR Displays' );
+
+			} );
 
 		}
 
@@ -59,8 +66,15 @@ module.exports = function( THREE ){
 
 		};
 
+		this.setVRDisplay = function ( value ) {
+
+			vrDisplay = value;
+
+		};
+
 		this.getVRDisplays = function () {
 
+			console.warn( 'THREE.VRControls: getVRDisplays() is being deprecated.' );
 			return vrDisplays;
 
 		};

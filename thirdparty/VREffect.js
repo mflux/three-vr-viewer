@@ -5,10 +5,9 @@
  * WebVR Spec: http://mozvr.github.io/webvr-spec/webvr.html
  *
  * Firefox: http://mozvr.com/downloads/
- * Chromium: https://drive.google.com/folderview?id=0BzudLt22BqGRbW9WTHMtOWMzNjQ&usp=sharing#list
+ * Chromium: https://webvr.info/get-chrome
  *
  */
-
 module.exports = function( THREE ){
 
 	THREE.VREffect = function ( renderer, onError ) {
@@ -19,6 +18,7 @@ module.exports = function( THREE ){
 		var renderRectL, renderRectR;
 
 		var frameData = null;
+
 		if ( 'VRFrameData' in window ) {
 
 			frameData = new VRFrameData();
@@ -43,7 +43,11 @@ module.exports = function( THREE ){
 
 		if ( navigator.getVRDisplays ) {
 
-			navigator.getVRDisplays().then( gotVRDisplays );
+			navigator.getVRDisplays().then( gotVRDisplays ).catch ( function () {
+
+				console.warn( 'THREE.VREffect: Unable to get VR Displays' );
+
+			} );
 
 		}
 
@@ -64,8 +68,15 @@ module.exports = function( THREE ){
 
 		};
 
+		this.setVRDisplay = function ( value ) {
+
+			vrDisplay = value;
+
+		};
+
 		this.getVRDisplays = function () {
 
+			console.warn( 'THREE.VREffect: getVRDisplays() is being deprecated.' );
 			return vrDisplays;
 
 		};
@@ -96,10 +107,10 @@ module.exports = function( THREE ){
 		var requestFullscreen;
 		var exitFullscreen;
 		var fullscreenElement;
-		var leftBounds = [ 0.0, 0.0, 0.5, 1.0 ];
-		var rightBounds = [ 0.5, 0.0, 0.5, 1.0 ];
+		var defaultLeftBounds = [ 0.0, 0.0, 0.5, 1.0 ];
+		var defaultRightBounds = [ 0.5, 0.0, 0.5, 1.0 ];
 
-		function onFullscreenChange() {
+		function onVRDisplayPresentChange() {
 
 			var wasPresenting = scope.isPresenting;
 			scope.isPresenting = vrDisplay !== undefined && vrDisplay.isPresenting;
@@ -109,16 +120,6 @@ module.exports = function( THREE ){
 				var eyeParamsL = vrDisplay.getEyeParameters( 'left' );
 				var eyeWidth = eyeParamsL.renderWidth;
 				var eyeHeight = eyeParamsL.renderHeight;
-
-				var layers = vrDisplay.getLayers();
-				if ( layers.length ) {
-
-					var layer = layers[0];
-
-					leftBounds = layer.leftBounds !== null && layer.leftBounds.length === 4 ? layer.leftBounds : [ 0.0, 0.0, 0.5, 1.0 ];
-					rightBounds = layer.rightBounds !== null && layer.rightBounds.length === 4 ? layer.rightBounds : [ 0.5, 0.0, 0.5, 1.0 ];
-
-				}
 
 				if ( !wasPresenting ) {
 
@@ -139,7 +140,7 @@ module.exports = function( THREE ){
 
 		}
 
-		window.addEventListener( 'vrdisplaypresentchange', onFullscreenChange, false );
+		window.addEventListener( 'vrdisplaypresentchange', onVRDisplayPresentChange, false );
 
 		this.setFullScreen = function ( boolean ) {
 
@@ -262,17 +263,35 @@ module.exports = function( THREE ){
 				// When rendering we don't care what the recommended size is, only what the actual size
 				// of the backbuffer is.
 				var size = renderer.getSize();
+				var layers = vrDisplay.getLayers();
+				var leftBounds;
+				var rightBounds;
+
+				if ( layers.length ) {
+
+					var layer = layers[ 0 ];
+
+					leftBounds = layer.leftBounds !== null && layer.leftBounds.length === 4 ? layer.leftBounds : defaultLeftBounds;
+					rightBounds = layer.rightBounds !== null && layer.rightBounds.length === 4 ? layer.rightBounds : defaultRightBounds;
+
+				} else {
+
+					leftBounds = defaultLeftBounds;
+					rightBounds = defaultRightBounds;
+
+				}
+
 				renderRectL = {
 					x: Math.round( size.width * leftBounds[ 0 ] ),
 					y: Math.round( size.height * leftBounds[ 1 ] ),
 					width: Math.round( size.width * leftBounds[ 2 ] ),
-					height:  Math.round(size.height * leftBounds[ 3 ] )
+					height: Math.round(size.height * leftBounds[ 3 ] )
 				};
 				renderRectR = {
 					x: Math.round( size.width * rightBounds[ 0 ] ),
 					y: Math.round( size.height * rightBounds[ 1 ] ),
 					width: Math.round( size.width * rightBounds[ 2 ] ),
-					height:  Math.round(size.height * rightBounds[ 3 ] )
+					height: Math.round(size.height * rightBounds[ 3 ] )
 				};
 
 				if ( renderTarget ) {
@@ -280,7 +299,7 @@ module.exports = function( THREE ){
 					renderer.setRenderTarget( renderTarget );
 					renderTarget.scissorTest = true;
 
-				} else  {
+				} else {
 
 					renderer.setRenderTarget( null );
 					renderer.setScissorTest( true );
@@ -312,7 +331,6 @@ module.exports = function( THREE ){
 
 					cameraL.projectionMatrix = fovToProjection( eyeParamsL.fieldOfView, true, camera.near, camera.far );
 					cameraR.projectionMatrix = fovToProjection( eyeParamsR.fieldOfView, true, camera.near, camera.far );
-
 
 				}
 
@@ -377,6 +395,12 @@ module.exports = function( THREE ){
 			// Regular render mode if not HMD
 
 			renderer.render( scene, camera, renderTarget, forceClear );
+
+		};
+
+		this.dispose = function () {
+
+			window.removeEventListener( 'vrdisplaypresentchange', onVRDisplayPresentChange, false );
 
 		};
 
