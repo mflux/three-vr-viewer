@@ -3,6 +3,7 @@
  * @author stewdio / http://stewd.io
  */
 module.exports = function( THREE ){
+
   THREE.ViveController = function ( id ) {
 
     THREE.Object3D.call( this );
@@ -62,6 +63,8 @@ module.exports = function( THREE ){
       gamepad = findGamepad( id );
 
       if ( gamepad !== undefined && gamepad.pose !== undefined ) {
+
+        if ( gamepad.pose === null ) return; // No user action yet
 
         //  Position and orientation.
 
