@@ -517,7 +517,7 @@ module.exports = function (THREE) {
 
 															var scope = this;
 
-															var loader = new THREE.XHRLoader(scope.manager);
+															var loader = new THREE.FileLoader(scope.manager);
 															loader.setPath(this.path);
 															loader.load(url, function (text) {
 
@@ -1422,7 +1422,7 @@ module.exports = function (THREE) {
 
 								if ('VRFrameData' in window) {
 
-												frameData = new VRFrameData();
+												frameData = new window.VRFrameData();
 								}
 
 								function gotVRDisplays(displays) {
@@ -1490,12 +1490,9 @@ module.exports = function (THREE) {
 												}
 								};
 
-								// fullscreen
+								// VR presentation
 
 								var canvas = renderer.domElement;
-								var requestFullscreen;
-								var exitFullscreen;
-								var fullscreenElement;
 								var defaultLeftBounds = [0.0, 0.0, 0.5, 1.0];
 								var defaultRightBounds = [0.5, 0.0, 0.5, 1.0];
 
