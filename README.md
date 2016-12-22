@@ -4,7 +4,7 @@
 
 One-liner to start THREE.js WebVR projects. This project serves as a super beginner friendly way to build WebVR experiments.
 
-For now this only works in the [WebVR enabled Chromium build](https://webvr.info/get-chrome/).
+Works for [WebVR enabled Chromium](https://webvr.info/get-chrome/) and [Firefox Nightly](https://nightly.mozilla.org).
 
 ## Setup ##
 
